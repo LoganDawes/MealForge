@@ -1,0 +1,14 @@
+asgiref
+Django
+django-cors-headers
+django-environ
+django-filter
+djangorestframework
+djangorestframework-simplejwt
+PyJWT
+psycopg2-binary
+pytz
+python-dotenv
+redis
+sentry-sdk
+whitenoise
