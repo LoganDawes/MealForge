@@ -39,6 +39,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 SIMPLE_JWT = {
@@ -55,9 +56,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "api",
+
+    # Third-party Apps
     "rest_framework",
     "corsheaders",
+    "django_filters",
+
+    # Microservices
+    "api",
+    "auth",
+    "user_management",
+    "search",
+    "integration",
+    "log_service",
 ]
 
 MIDDLEWARE = [
@@ -144,5 +155,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWS_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    # CHANGE IN DEPLOYMENT
+    "https://frontend.com",
+]
+CORS_ALLOW_CREDENTIALS = True
