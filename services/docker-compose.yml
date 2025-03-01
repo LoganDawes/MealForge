@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  api_gateway:
+    build: ./api_gateway
+    container_name: api_gateway
+    env_file:
+      - ./api_gateway/.env
+    ports:
+      - "8000:8000"
+    networks:
+      - backend_network
+
+  auth_service:
+    build: ./auth_service
+    container_name: auth_service
+    env_file:
+      - ./auth_service/.env
+    ports:
+      - "8001:8000"
+    depends_on:
+      - api_gateway
+    networks:
+      - backend_network
+
+  user_service:
+    build: ./user_service
+    container_name: user_service
+    env_file:
+      - ./user_service/.env
+    ports:
+      - "8002:8000"
+    depends_on:
+      - api_gateway
+    environment:
+      - DATABASE_HOST=mealforge-db.mysql.database.azure.com
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=user_db
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=admin123
+    networks:
+      - backend_network
+
+  search_service:
+    build: ./search_service
+    container_name: search_service
+    env_file:
+      - ./search_service/.env
+    ports:
+      - "8003:8000"
+    depends_on:
+      - api_gateway
+    networks:
+      - backend_network
+
+  integration_service:
+    build: ./integration_service
+    container_name: integration_service
+    env_file:
+      - ./integration_service/.env
+    ports:
+      - "8004:8000"
+    depends_on:
+      - api_gateway
+    networks:
+      - backend_network
+
+  logging_service:
+    build: ./logging_service
+    container_name: logging_service
+    env_file:
+      - ./logging_service/.env
+    ports:
+      - "8005:8000"
+    depends_on:
+      - api_gateway
+    environment:
+      - DATABASE_HOST=mealforge-db.mysql.database.azure.com
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=log_db
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=admin123
+    networks:
+      - backend_network
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    env_file:
+      - ./.env
+    environment:
+      MYSQL_ROOT_PASSWORD: example_root_password
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - backend_network
+
+volumes:
+  mysql_data:
+
+networks:
+  backend_network:
+    driver: bridge
