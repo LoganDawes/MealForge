@@ -32,7 +32,7 @@ services:
       - api_gateway
     environment:
       - DATABASE_HOST=mealforge-db.mysql.database.azure.com
-      - DATABASE_PORT=3306
+      - DATABASE_PORT=3307
       - DATABASE_NAME=user_db
       - DATABASE_USER=admin
       - DATABASE_PASSWORD=admin123
@@ -74,27 +74,10 @@ services:
       - api_gateway
     environment:
       - DATABASE_HOST=mealforge-db.mysql.database.azure.com
-      - DATABASE_PORT=3306
+      - DATABASE_PORT=3308
       - DATABASE_NAME=log_db
       - DATABASE_USER=admin
       - DATABASE_PASSWORD=admin123
-    networks:
-      - backend_network
-
-  db:
-    image: mysql:8.0
-    container_name: mysql_db
-    env_file:
-      - ./.env
-    environment:
-      MYSQL_ROOT_PASSWORD: example_root_password
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: example_user
-      MYSQL_PASSWORD: example_password
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
       - backend_network
 

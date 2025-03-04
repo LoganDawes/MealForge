@@ -85,9 +85,10 @@ DATABASES = {
         'USER': 'admin',
         'PASSWORD': 'admin123',
         'HOST': 'mealforge-db.mysql.database.azure.com',  # Use the same server
-        'PORT': '3306',
+        'PORT': '3308',
         'OPTIONS': {
-            'ssl': {'ca': './DigiCertGlobalRootCA.crt.pem'},
+            #'ssl': {'ca': './DigiCertGlobalRootCA.crt.pem'},
+            'ssl': {'ca': None, 'cert': None, 'key': None},
         }
     }
 }
