@@ -5,11 +5,12 @@ from django.views import View
 from django.conf import settings
 
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 # Auth Service's URL is in settings.py
 AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
 
-@csrf_exempt
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterUserView(View):
     def post(self, request):
         data = request.POST.dict()  # Assuming form data
