@@ -4,9 +4,12 @@ from django.http import JsonResponse
 from django.views import View
 from django.conf import settings
 
+from django.views.decorators.csrf import csrf_exempt
+
 # Auth Service's URL is in settings.py
 AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
 
+@csrf_exempt
 class RegisterUserView(View):
     def post(self, request):
         data = request.POST.dict()  # Assuming form data
