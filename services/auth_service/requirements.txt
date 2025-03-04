@@ -5,3 +5,4 @@ django-environ
 gunicorn
 psycopg2-binary
 djangorestframework-simplejwt
+requests
