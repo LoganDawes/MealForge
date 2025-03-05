@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'logging_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'user_db',
+        'NAME': 'log_db',
         'USER': 'admin',
         'PASSWORD': 'admin123',
         'HOST': 'mealforge-db.mysql.database.azure.com',  # Use the same server
