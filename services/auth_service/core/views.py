@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import requests
+import json
 from django.http import JsonResponse
 from django.views import View
 from django.conf import settings
@@ -12,14 +13,18 @@ USER_SERVICE_URL = settings.USER_SERVICE_URL
 
 class RegisterView(View):
     def post(self, request):
-        data = request.POST.dict()  # Convert incoming data
-        data["password"] = make_password(data["password"])  # Hash password
-
         try:
+            # Read JSON
+            data = json.loads(request.body)
+            data["password"] = make_password(data["password"])  # Hash password
+
             # Send post request to User Service
             response = requests.post(f"{USER_SERVICE_URL}/users/", json=data)
             response.raise_for_status()
 
+        # Exception Handling
+        except json.JSONDecodeError:
+            return JsonResponse({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             return JsonResponse({"message": str(e)}, status=500)
         

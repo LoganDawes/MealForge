@@ -157,4 +157,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS: True
 
 # URLS
-USER_SERVICE_URL = "http://user_service:8002"
+USER_SERVICE_URL = "http://user_service:8000/api"
