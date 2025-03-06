@@ -1,7 +1,7 @@
 services:
   api_gateway:
     build: ./api_gateway
-    container_name: api_gateway
+    container_name: api-gateway
     env_file:
       - ./api_gateway/.env
     ports:
@@ -11,7 +11,7 @@ services:
 
   auth_service:
     build: ./auth_service
-    container_name: auth_service
+    container_name: auth-service
     env_file:
       - ./auth_service/.env
     ports:
@@ -23,7 +23,7 @@ services:
 
   user_service:
     build: ./user_service
-    container_name: user_service
+    container_name: user-service
     env_file:
       - ./user_service/.env
     ports:
@@ -41,7 +41,7 @@ services:
 
   search_service:
     build: ./search_service
-    container_name: search_service
+    container_name: search-service
     env_file:
       - ./search_service/.env
     ports:
@@ -53,7 +53,7 @@ services:
 
   integration_service:
     build: ./integration_service
-    container_name: integration_service
+    container_name: integration-service
     env_file:
       - ./integration_service/.env
     ports:
@@ -65,7 +65,7 @@ services:
 
   logging_service:
     build: ./logging_service
-    container_name: logging_service
+    container_name: logging-service
     env_file:
       - ./logging_service/.env
     ports:
