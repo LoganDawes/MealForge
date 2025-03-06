@@ -29,46 +29,46 @@ class RegisterView(View):
             logger.info(f"Received Data at auth_service: {data}")
 
             # Test for required fields
-            required_fields = {"username", "password", "email"}
+            required_fields = {"username", "email", "password"}
             if not required_fields.issubset(data):
+                logger.error(f"Missing required fields. Received: {data}")
                 return JsonResponse({"message": "Missing required fields"}, status=400)
-            
-            # Hash password
-            data["password"] = make_password(data["password"])
 
             # Send post request to User Service
+            logger.info(f"Sending data to user service: {data}")
             response = requests.post(f"{USER_SERVICE_URL}/api/users/", json=data)
+            logger.info(f"Response from user service: {response.status_code} - {response.text}")
             response.raise_for_status()
 
         # Exception Handling
         except json.JSONDecodeError:
+            logger.error(f"Invalid JSON data received: {request.body}")
             return JsonResponse({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
+            logger.error(f"Error when calling user service: {str(e)}")
             return JsonResponse({"message": str(e)}, status=500)
         
-        # If user successfully created, register with JWT token
+        # If user successfully created, store JWT token
         if response.status_code == 201:
-                # Use the same credentials to authenticate the user
-                username = data["username"]
-                password = data["password"]
+            # Get JWT tokens from create user response
+            tokens = response.json()
+            access_token = tokens.get("access_token")
+            refresh_token = tokens.get("refresh_token")
 
-                # Authenticate the user
-                user = authenticate(username=username, password=password)
+            # Test for recieved tokens
+            if not access_token:
+                logger.error("No access token received from user service")
+                return JsonResponse({"message": "Authentication failed, no token received."}, status=400)
 
-                if user is None:
-                    return JsonResponse({"message": "Authentication failed, invalid credentials."}, status=400)
+            logger.info(f"User {data['username']} registered successfully. Token stored.")
 
-                # Generate JWT token
-                refresh = RefreshToken.for_user(user)
-                access_token = str(refresh.access_token)
+            return JsonResponse({
+                "message": "User registered successfully",
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }, status=201)
 
-                # Return success response with JWT token
-                return JsonResponse({
-                    "message": "User registered successfully",
-                    "access_token": access_token,
-                    "refresh_token": str(refresh)
-                }, status=201)
-
+        logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.json()}")
         return JsonResponse(response.json(), status=response.status_code)
         
         
