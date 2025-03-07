@@ -161,5 +161,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Disable for production
 CORS_ALLOW_ALL_ORIGINS: True
 
-# URLS
+#URLS
+AUTH_SERVICE_URL = "http://auth-service:8000"
 USER_SERVICE_URL = "http://user-service:8000"
+SEARCH_SERVICE_URL = "http://search-service:8000"
+INTEGRATION_SERVICE_URL = "http://integration-service:8000"
+LOGGING_SERVICE_URL = "http://logging-service:8000"
