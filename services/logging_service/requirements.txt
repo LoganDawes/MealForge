@@ -6,4 +6,3 @@ gunicorn
 psycopg2-binary
 sentry-sdk
 mysqlclient
-python-dotenv

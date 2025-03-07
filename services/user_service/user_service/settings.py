@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+# Initialize environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,11 +90,11 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'user_db',
-        'USER': 'admin',
-        'PASSWORD': 'admin123',
-        'HOST': 'mealforge-db.mysql.database.azure.com',  # Use the same server
-        'PORT': '3306',
+        'NAME': env.str('DB_NAME'),
+        'USER': env.str('DB_USER'),
+        'PASSWORD': env.str('DB_PASSWORD'),
+        'HOST': env.str('DB_HOST'),  # Use the same server
+        'PORT': env.str('DB_PORT'),
         'OPTIONS': {
             #'ssl': {'ca': './DigiCertGlobalRootCA.crt.pem'},
             'ssl': {'ssl_disabled': True},
