@@ -5,9 +5,7 @@ import logging
 from django.http import JsonResponse
 from django.views import View
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -71,4 +69,17 @@ class RegisterView(View):
         logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.json()}")
         return JsonResponse(response.json(), status=response.status_code)
         
-        
+class UnregisterView(View):
+    def post(self, request):
+        # NYI
+        return None
+    
+class LoginView(View):
+    def post(self, request):
+        # NYI
+        return None
+    
+class LogoutView(View):
+    def post(self, request):
+        # NYI
+        return None
