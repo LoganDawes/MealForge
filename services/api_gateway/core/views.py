@@ -42,3 +42,43 @@ class RegisterUserView(View):
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return JsonResponse({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class UnregisterUserView(View):
+    def post(self, request):
+        try:
+            # Read JSON
+            data = json.loads(request.body)
+
+            # LOGGER : Test recieved data
+            logger.info(f"Received Data at api_gateway: {data}")
+
+            # Send post request to Auth service
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/unregister/", json=data, headers={"Content-Type": "application/json"})
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+
+            # Return response from Auth service
+            return JsonResponse(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received")
+            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return JsonResponse({"message": str(e)}, status=500)
+    
+@method_decorator(csrf_exempt, name='dispatch')
+class LoginUserView(View):
+    def post(self, request):
+        # NYI
+        return None
+    
+@method_decorator(csrf_exempt, name='dispatch')
+class LogoutUserView(View):
+    def post(self, request):
+        # NYI
+        return None

@@ -24,7 +24,7 @@ class RegisterView(View):
             data = json.loads(request.body)
 
             # LOGGER : Test Recieved Data
-            logger.info(f"Received Data at auth_service: {data}")
+            logger.info(f"Received Register Data at auth_service: {data}")
 
             # Test for required fields
             required_fields = {"username", "email", "password"}
@@ -33,7 +33,7 @@ class RegisterView(View):
                 return JsonResponse({"message": "Missing required fields"}, status=400)
 
             # Send post request to User Service
-            logger.info(f"Sending data to user service: {data}")
+            logger.info(f"Sending data to user service for registering: {data}")
             response = requests.post(f"{USER_SERVICE_URL}/api/users/", json=data)
             logger.info(f"Response from user service: {response.status_code} - {response.text}")
             response.raise_for_status()
@@ -66,19 +66,57 @@ class RegisterView(View):
                 "refresh_token": refresh_token
             }, status=201)
 
+        # If user creation failed
         logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.json()}")
         return JsonResponse(response.json(), status=response.status_code)
         
+@method_decorator(csrf_exempt, name='dispatch')
 class UnregisterView(View):
     def post(self, request):
-        # NYI
-        return None
+        try:
+            # Read JSON
+            data = json.loads(request.body)
+
+            # LOGGER : Test Recieved Data
+            logger.info(f"Received Unregister Data at auth_service: {data}")
+
+            # Test for required fields
+            required_fields = {"username", "email", "password"}
+            if not required_fields.issubset(data):
+                logger.error(f"Missing required fields. Received: {data}")
+                return JsonResponse({"message": "Missing required fields"}, status=400)
+
+            # Send delete request to User Service
+            logger.info(f"Sending data to user service for deletion: {data}")
+            response = requests.delete(f"{USER_SERVICE_URL}/api/users/", json=data)
+            logger.info(f"Response from user service: {response.status_code} - {response.text}")
+            response.raise_for_status()
+
+            # If user successfully unregistered, give response
+            if response.status_code == 200:
+                logger.info(f"User {data['username']} successfully unregistered")
+                return JsonResponse({"message": "User unregistered successfully"}, status=200)
+            
+            # If user deletion failed
+            else:
+                logger.error(f"Failed to unregister user {data['username']}. Response from user service: {response.json()}")
+                return JsonResponse(response.json(), status=response.status_code)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error(f"Invalid JSON data received: {request.body}")
+            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error when calling user service: {str(e)}")
+            return JsonResponse({"message": str(e)}, status=500)
     
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(View):
     def post(self, request):
         # NYI
         return None
     
+@method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(View):
     def post(self, request):
         # NYI
