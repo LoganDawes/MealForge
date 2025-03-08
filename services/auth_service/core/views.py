@@ -113,8 +113,51 @@ class UnregisterView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(View):
     def post(self, request):
-        # NYI
-        return None
+        try:
+            # Read JSON
+            data = json.loads(request.body)
+
+            # LOGGER: Test received data
+            logger.info(f"Received Login Data at auth_service: {data}")
+
+            # Test for required fields
+            required_fields = {"username", "password"}
+            if not required_fields.issubset(data):
+                logger.error(f"Missing required fields. Received: {data}")
+                return JsonResponse({"message": "Missing required fields"}, status=400)
+
+            # Forward authentication request to User Service
+            response = requests.post(f"{USER_SERVICE_URL}/api/authenticate/", json=data, headers={"Content-Type": "application/json"})
+            logger.info(f"Response from user service: {response.status_code}, {response.text}")
+
+            # Handle authentication failure
+            if response.status_code != 200:
+                return JsonResponse(response.json(), status=response.status_code)
+
+            # Extract JWT tokens from user service response
+            tokens = response.json()
+            access_token = tokens.get("access_token")
+            refresh_token = tokens.get("refresh_token")
+
+            if not access_token:
+                logger.error("No access token received from user service")
+                return JsonResponse({"message": "Authentication failed, no token received."}, status=400)
+
+            logger.info(f"User {data['username']} authenticated successfully. Token stored.")
+
+            return JsonResponse({
+                "message": "Login successful",
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }, status=200)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for login")
+            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error when calling user service: {str(e)}")
+            return JsonResponse({"message": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(View):

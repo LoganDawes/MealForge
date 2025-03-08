@@ -91,3 +91,40 @@ class UserView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error during user deletion: {str(e)}")
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class AuthenticateUserView(APIView):
+    def post(self, request):
+        try:
+            # Read JSON
+            data = request.data
+
+            # LOGGER: Test received data
+            logger.info(f"Received authentication request at user_service: {data}")
+
+            # Authenticate user
+            user = authenticate(username=data["username"], password=data["password"])
+            if user is None:
+                logger.error(f"Authentication failed for user {data['username']}")
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            logger.info(f"User {data['username']} authenticated successfully. Tokens generated.")
+
+            return Response({
+                "message": "Authentication successful",
+                "access_token": access_token,
+                "refresh_token": str(refresh)
+            }, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for authentication")
+            return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error during user authentication: {str(e)}")
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
