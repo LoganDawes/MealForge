@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import environ
+from datetime import timedelta
 
 # Initialize environment variables
 env = environ.Env()
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
 
     'core',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
 ]
 
@@ -122,6 +124,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# JWT settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Expiration time for access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Expiration time for refresh tokens
+    'SIGNING_KEY': "placeholder_secret_key",
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

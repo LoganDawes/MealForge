@@ -162,5 +162,28 @@ class LoginView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(View):
     def post(self, request):
-        # NYI
-        return None
+        try:
+            # Read JSON
+            data = json.loads(request.body)
+
+            # LOGGER: Test received data
+            logger.info(f"Received Login Data at auth_service: {data}")
+
+            # Test for required fields
+            if "refresh_token" not in data:
+                logger.error("Missing refresh token in logout request")
+                return JsonResponse({"message": "Missing refresh token"}, status=400)
+
+            # Forward logout request to User Service
+            response = requests.post(f"{USER_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"})
+            logger.info(f"Response from user service: {response.status_code}, {response.text}")
+
+            return JsonResponse(response.json(), status=response.status_code)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for login")
+            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error when calling user service: {str(e)}")
+            return JsonResponse({"message": str(e)}, status=500)

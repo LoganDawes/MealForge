@@ -78,6 +78,15 @@ class UserView(APIView):
             if authenticated_user is None:
                 logger.error(f"Authentication failed for {user.username} after creation")
                 return Response({"message": "User found, but authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Blacklist the refresh token
+            try:
+                token = RefreshToken(data["refresh_token"])
+                token.blacklist()
+                logger.info("Refresh token successfully blacklisted")
+            except Exception as e:
+                logger.error(f"Failed to blacklist token: {str(e)}")
+                return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
 
             # Delete user
             user.delete()
@@ -127,4 +136,39 @@ class AuthenticateUserView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error during user authentication: {str(e)}")
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class LogoutUserView(APIView):
+    def post(self, request):
+        try:
+            # Read JSON
+            data = request.data
+
+            # LOGGER: Test received data
+            logger.info(f"Received logout request at user_service: {data}")
+
+            # Ensure refresh token is provided
+            if "refresh_token" not in data:
+                logger.error("Missing refresh token in logout request")
+                return Response({"message": "Missing refresh token"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklist the refresh token
+            try:
+                token = RefreshToken(data["refresh_token"])
+                token.blacklist()
+                logger.info("Refresh token successfully blacklisted")
+
+                return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+            except Exception as e:
+                logger.error(f"Failed to blacklist token: {str(e)}")
+                return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for logout")
+            return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error during logout: {str(e)}")
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
