@@ -1,12 +1,13 @@
-from django.shortcuts import render
 import requests
 import json
 import logging
-from rest_framework.response import Response
-from django.views import View
-from rest_framework.views import APIView
 from django.conf import settings
 
+# REST Framework
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+# CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
@@ -25,7 +26,7 @@ class RegisterUserView(APIView):
             data = json.loads(request.body)
 
             # LOGGER : Test recieved data
-            logger.info(f"Received Data at api_gateway: {data}")
+            logger.info(f"Received Data at api_gateway for register: {data}")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/register/", json=data, headers={"Content-Type": "application/json"})
@@ -53,7 +54,7 @@ class UnregisterUserView(APIView):
             data = json.loads(request.body)
 
             # LOGGER : Test recieved data
-            logger.info(f"Received Data at api_gateway: {data}")
+            logger.info(f"Received Data at api_gateway for unregister: {data}")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/unregister/", json=data, headers={"Content-Type": "application/json"})
@@ -109,7 +110,7 @@ class LogoutUserView(APIView):
             data = json.loads(request.body)
 
             # LOGGER: Test received data
-            logger.info(f"Received Data at api_gateway for login: {data}")
+            logger.info(f"Received Data at api_gateway for logout: {data}")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"})
@@ -172,14 +173,14 @@ class UpdatePreferencesView(APIView):
             # Access Token
             token = auth_header.split(" ")[1]
             
-            # LOGGER: Test received data
+            # LOGGER: Test received token
             logger.info(f"Received Token for Update Preferences: {token}")
 
-            # Read the JSON data from the request body
+            # Read JSON
             data = json.loads(request.body)
 
-            # LOGGER: Log data being sent to user service
-            logger.info(f"Sending Data to User Service: {data}")
+            # LOGGER: Test received data
+            logger.info(f"Sending Data to User Service for update preferences: {data}")
 
             # Send put request to User service
             response = requests.put(f"{USER_SERVICE_URL}/api/preferences/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})

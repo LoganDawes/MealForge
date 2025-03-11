@@ -1,17 +1,21 @@
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import authenticate
-from .serializers import UserSerializer
-from django.contrib.auth.models import User
-from rest_framework import permissions, status
-from .models import UserPreferences
-from .serializers import UserPreferencesSerializer
-import logging
+import requests
 import json
+import logging
+from django.conf import settings
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
+# REST Framework
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import permissions, status
+
+# Models & Serializers
+from django.contrib.auth.models import User
+from .models import UserPreferences
+from .serializers import UserSerializer, UserPreferencesSerializer
+
+# CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
@@ -20,7 +24,7 @@ logger = logging.getLogger('django')
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     # POST Request
     def post(self, request):
@@ -111,7 +115,7 @@ class UserView(APIView):
         
 @method_decorator(csrf_exempt, name='dispatch')
 class AuthenticateUserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         try:
@@ -149,7 +153,7 @@ class AuthenticateUserView(APIView):
         
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutUserView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         try:

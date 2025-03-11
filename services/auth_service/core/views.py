@@ -1,13 +1,14 @@
-from django.shortcuts import render
 import requests
 import json
 import logging
-from rest_framework.response import Response
-from django.views import View
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
 from django.conf import settings
 
+# REST Framework
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import permissions
+
+# CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
@@ -19,7 +20,7 @@ USER_SERVICE_URL = settings.USER_SERVICE_URL
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         try:
@@ -75,7 +76,7 @@ class RegisterView(APIView):
         
 @method_decorator(csrf_exempt, name='dispatch')
 class UnregisterView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         try:
@@ -117,7 +118,7 @@ class UnregisterView(APIView):
     
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         try:
@@ -168,7 +169,7 @@ class LoginView(APIView):
     
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         try:

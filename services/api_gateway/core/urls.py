@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from .views import RegisterUserView, UnregisterUserView, LoginUserView, LogoutUserView, GetPreferencesView, UpdatePreferencesView
 
 urlpatterns = [
