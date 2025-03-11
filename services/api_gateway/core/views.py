@@ -2,21 +2,23 @@ from django.shortcuts import render
 import requests
 import json
 import logging
-from django.http import JsonResponse
+from rest_framework.response import Response
 from django.views import View
+from rest_framework.views import APIView
 from django.conf import settings
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 # Initialzes Logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
-# Auth Service's URL is in settings.py
+# Get Service's URLs in settings.py
 AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
+USER_SERVICE_URL = settings.USER_SERVICE_URL
 
 @method_decorator(csrf_exempt, name='dispatch')
-class RegisterUserView(View):
+class RegisterUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
@@ -33,18 +35,18 @@ class RegisterUserView(View):
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # Return response from Auth service
-            return JsonResponse(response.json(), status=response.status_code)
+            return Response(response.json(), status=response.status_code)
         
         # Exception Handling
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
         
 @method_decorator(csrf_exempt, name='dispatch')
-class UnregisterUserView(View):
+class UnregisterUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
@@ -61,18 +63,18 @@ class UnregisterUserView(View):
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # Return response from Auth service
-            return JsonResponse(response.json(), status=response.status_code)
+            return Response(response.json(), status=response.status_code)
         
         # Exception Handling
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class LoginUserView(View):
+class LoginUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
@@ -89,18 +91,18 @@ class LoginUserView(View):
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # Return response from Auth Service
-            return JsonResponse(response.json(), status=response.status_code)
+            return Response(response.json(), status=response.status_code)
 
         # Exception Handling
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received for login")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class LogoutUserView(View):
+class LogoutUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
@@ -117,12 +119,79 @@ class LogoutUserView(View):
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # Return response from Auth Service
-            return JsonResponse(response.json(), status=response.status_code)
+            return Response(response.json(), status=response.status_code)
 
         # Exception Handling
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received for logout")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class GetPreferencesView(APIView):
+    def get(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            token = auth_header.split(" ")[1]
+            
+            # LOGGER: Test received data
+            logger.info(f"Received Token for Get Preferences: {token}")
+
+            # Send get request to User service
+            response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UpdatePreferencesView(APIView):
+    def put(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            token = auth_header.split(" ")[1]
+            
+            # LOGGER: Test received data
+            logger.info(f"Received Token for Update Preferences: {token}")
+
+            # Read the JSON data from the request body
+            data = json.loads(request.body)
+
+            # LOGGER: Log data being sent to user service
+            logger.info(f"Sending Data to User Service: {data}")
+
+            # Send put request to User service
+            response = requests.put(f"{USER_SERVICE_URL}/api/preferences/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)

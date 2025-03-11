@@ -1,10 +1,14 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer
 from django.contrib.auth.models import User
+from rest_framework import permissions, status
+from .models import UserPreferences
+from .serializers import UserPreferencesSerializer
 import logging
 import json
 
@@ -12,10 +16,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 # Initialzes Logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserView(APIView):
+    permission_classes = [AllowAny]
+
+    # POST Request
     def post(self, request):
         try:
             # Read JSON
@@ -59,6 +66,7 @@ class UserView(APIView):
             logger.error(f"Unexpected error during user creation: {str(e)}")
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    # DELETE Request
     def delete(self, request):
         try:
             # Read JSON
@@ -103,6 +111,8 @@ class UserView(APIView):
         
 @method_decorator(csrf_exempt, name='dispatch')
 class AuthenticateUserView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             # Read JSON
@@ -139,6 +149,8 @@ class AuthenticateUserView(APIView):
         
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutUserView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             # Read JSON
@@ -170,5 +182,51 @@ class LogoutUserView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error during logout: {str(e)}")
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class UserPreferencesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    # GET Request
+    def get(self, request):
+        try:
+            # Fetch or create default preferences for the authenticated user
+            preferences, created = UserPreferences.objects.get_or_create(user=request.user)
+            serializer = UserPreferencesSerializer(preferences)
+
+            # LOGGER: Test received data
+            logger.info(f"Retrieved preferences for user {request.user.username} (Created: {created})")
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error retrieving preferences for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while retrieving preferences."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # PUT Request
+    def put(self, request):
+        try:
+            # Fetch or create default preferences for the authenticated user
+            preferences, _ = UserPreferences.objects.get_or_create(user=request.user)
+
+            # LOGGER: Test received data
+            logger.info(f"Received update request for user {request.user.username}: {request.data}")
+
+            # Validate and update preferences
+            serializer = UserPreferencesSerializer(preferences, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"Updated preferences for user {request.user.username}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            # Log validation errors
+            logger.warning(f"Validation failed for user {request.user.username}: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error updating preferences for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while updating preferences."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

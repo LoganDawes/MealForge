@@ -2,22 +2,25 @@ from django.shortcuts import render
 import requests
 import json
 import logging
-from django.http import JsonResponse
+from rest_framework.response import Response
 from django.views import View
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from django.conf import settings
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 # Initialzes Logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 # User Service's URL is in settings.py
 USER_SERVICE_URL = settings.USER_SERVICE_URL
 
 @method_decorator(csrf_exempt, name='dispatch')
-class RegisterView(View):
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             # Read JSON
@@ -30,7 +33,7 @@ class RegisterView(View):
             required_fields = {"username", "email", "password"}
             if not required_fields.issubset(data):
                 logger.error(f"Missing required fields. Received: {data}")
-                return JsonResponse({"message": "Missing required fields"}, status=400)
+                return Response({"message": "Missing required fields"}, status=400)
 
             # Send post request to User Service
             logger.info(f"Sending data to user service for registering: {data}")
@@ -41,10 +44,10 @@ class RegisterView(View):
         # Exception Handling
         except json.JSONDecodeError:
             logger.error(f"Invalid JSON data received: {request.body}")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error when calling user service: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
         
         # If user successfully created, store JWT token
         if response.status_code == 201:
@@ -56,11 +59,11 @@ class RegisterView(View):
             # Test for recieved tokens
             if not access_token:
                 logger.error("No access token received from user service")
-                return JsonResponse({"message": "Authentication failed, no token received."}, status=400)
+                return Response({"message": "Authentication failed, no token received."}, status=400)
 
             logger.info(f"User {data['username']} registered successfully. Token stored.")
 
-            return JsonResponse({
+            return Response({
                 "message": "User registered successfully",
                 "access_token": access_token,
                 "refresh_token": refresh_token
@@ -68,10 +71,12 @@ class RegisterView(View):
 
         # If user creation failed
         logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.json()}")
-        return JsonResponse(response.json(), status=response.status_code)
+        return Response(response.json(), status=response.status_code)
         
 @method_decorator(csrf_exempt, name='dispatch')
-class UnregisterView(View):
+class UnregisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             # Read JSON
@@ -81,10 +86,10 @@ class UnregisterView(View):
             logger.info(f"Received Unregister Data at auth_service: {data}")
 
             # Test for required fields
-            required_fields = {"username", "email", "password"}
+            required_fields = {"username", "password", "refresh_token"}
             if not required_fields.issubset(data):
                 logger.error(f"Missing required fields. Received: {data}")
-                return JsonResponse({"message": "Missing required fields"}, status=400)
+                return Response({"message": "Missing required fields"}, status=400)
 
             # Send delete request to User Service
             logger.info(f"Sending data to user service for deletion: {data}")
@@ -95,23 +100,25 @@ class UnregisterView(View):
             # If user successfully unregistered, give response
             if response.status_code == 200:
                 logger.info(f"User {data['username']} successfully unregistered")
-                return JsonResponse({"message": "User unregistered successfully"}, status=200)
+                return Response({"message": "User unregistered successfully"}, status=200)
             
             # If user deletion failed
             else:
                 logger.error(f"Failed to unregister user {data['username']}. Response from user service: {response.json()}")
-                return JsonResponse(response.json(), status=response.status_code)
+                return Response(response.json(), status=response.status_code)
 
         # Exception Handling
         except json.JSONDecodeError:
             logger.error(f"Invalid JSON data received: {request.body}")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error when calling user service: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class LoginView(View):
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             # Read JSON
@@ -124,7 +131,7 @@ class LoginView(View):
             required_fields = {"username", "password"}
             if not required_fields.issubset(data):
                 logger.error(f"Missing required fields. Received: {data}")
-                return JsonResponse({"message": "Missing required fields"}, status=400)
+                return Response({"message": "Missing required fields"}, status=400)
 
             # Forward authentication request to User Service
             response = requests.post(f"{USER_SERVICE_URL}/api/authenticate/", json=data, headers={"Content-Type": "application/json"})
@@ -132,7 +139,7 @@ class LoginView(View):
 
             # Handle authentication failure
             if response.status_code != 200:
-                return JsonResponse(response.json(), status=response.status_code)
+                return Response(response.json(), status=response.status_code)
 
             # Extract JWT tokens from user service response
             tokens = response.json()
@@ -141,11 +148,11 @@ class LoginView(View):
 
             if not access_token:
                 logger.error("No access token received from user service")
-                return JsonResponse({"message": "Authentication failed, no token received."}, status=400)
+                return Response({"message": "Authentication failed, no token received."}, status=400)
 
             logger.info(f"User {data['username']} authenticated successfully. Token stored.")
 
-            return JsonResponse({
+            return Response({
                 "message": "Login successful",
                 "access_token": access_token,
                 "refresh_token": refresh_token
@@ -154,36 +161,38 @@ class LoginView(View):
         # Exception Handling
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received for login")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error when calling user service: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class LogoutView(View):
+class LogoutView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             # Read JSON
             data = json.loads(request.body)
 
             # LOGGER: Test received data
-            logger.info(f"Received Login Data at auth_service: {data}")
+            logger.info(f"Received Logout Data at auth_service: {data}")
 
             # Test for required fields
             if "refresh_token" not in data:
                 logger.error("Missing refresh token in logout request")
-                return JsonResponse({"message": "Missing refresh token"}, status=400)
+                return Response({"message": "Missing refresh token"}, status=400)
 
             # Forward logout request to User Service
             response = requests.post(f"{USER_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"})
             logger.info(f"Response from user service: {response.status_code}, {response.text}")
 
-            return JsonResponse(response.json(), status=response.status_code)
+            return Response(response.json(), status=response.status_code)
 
         # Exception Handling
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received for login")
-            return JsonResponse({"message": "Invalid JSON data"}, status=400)
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error when calling user service: {str(e)}")
-            return JsonResponse({"message": str(e)}, status=500)
+            return Response({"message": str(e)}, status=500)
