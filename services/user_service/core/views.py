@@ -32,7 +32,7 @@ class UserView(APIView):
             # Read JSON
             data = json.loads(request.body)
 
-            # LOGGER : Test Recieved Data
+            # LOGGER : Test received Data
             logger.info(f"Received Data for user creation: {data}")
 
             # Use User Serializer to create User

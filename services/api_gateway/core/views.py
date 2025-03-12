@@ -25,11 +25,11 @@ class RegisterUserView(APIView):
             # Read JSON
             data = json.loads(request.body)
 
-            # LOGGER : Test recieved data
+            # LOGGER : Test received data
             logger.info(f"Received Data at api_gateway for register: {data}")
 
             # Send post request to Auth service
-            response = requests.post(f"{AUTH_SERVICE_URL}/api/register/", json=data, headers={"Content-Type": "application/json"})
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/register/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
@@ -53,11 +53,11 @@ class UnregisterUserView(APIView):
             # Read JSON
             data = json.loads(request.body)
 
-            # LOGGER : Test recieved data
+            # LOGGER : Test received data
             logger.info(f"Received Data at api_gateway for unregister: {data}")
 
             # Send post request to Auth service
-            response = requests.post(f"{AUTH_SERVICE_URL}/api/unregister/", json=data, headers={"Content-Type": "application/json"})
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/unregister/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
@@ -85,10 +85,7 @@ class LoginUserView(APIView):
             logger.info(f"Received Data at api_gateway for login: {data}")
 
             # Send post request to Auth service
-            response = requests.post(f"{AUTH_SERVICE_URL}/api/login/", json=data, headers={"Content-Type": "application/json"})
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
-
-            # LOGGER : Test response data
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/login/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # Return response from Auth Service
@@ -113,7 +110,7 @@ class LogoutUserView(APIView):
             logger.info(f"Received Data at api_gateway for logout: {data}")
 
             # Send post request to Auth service
-            response = requests.post(f"{AUTH_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"})
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # LOGGER : Test response data
@@ -141,13 +138,17 @@ class GetPreferencesView(APIView):
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
-            token = auth_header.split(" ")[1]
-            
-            # LOGGER: Test received data
-            logger.info(f"Received Token for Get Preferences: {token}")
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Update Preferences: {token}")
 
             # Send get request to User service
-            response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
@@ -168,10 +169,15 @@ class UpdatePreferencesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
+                logger.info(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
-            token = auth_header.split(" ")[1]
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
             
             # LOGGER: Test received token
             logger.info(f"Received Token for Update Preferences: {token}")
@@ -183,7 +189,7 @@ class UpdatePreferencesView(APIView):
             logger.info(f"Sending Data to User Service for update preferences: {data}")
 
             # Send put request to User service
-            response = requests.put(f"{USER_SERVICE_URL}/api/preferences/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            response = requests.put(f"{USER_SERVICE_URL}/api/preferences/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data

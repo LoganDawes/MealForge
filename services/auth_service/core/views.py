@@ -27,7 +27,7 @@ class RegisterView(APIView):
             # Read JSON
             data = json.loads(request.body)
 
-            # LOGGER : Test Recieved Data
+            # LOGGER : Test received Data
             logger.info(f"Received Register Data at auth_service: {data}")
 
             # Test for required fields
@@ -38,7 +38,7 @@ class RegisterView(APIView):
 
             # Send post request to User Service
             logger.info(f"Sending data to user service for registering: {data}")
-            response = requests.post(f"{USER_SERVICE_URL}/api/users/", json=data)
+            response = requests.post(f"{USER_SERVICE_URL}/api/users/", json=data, timeout=10)
             logger.info(f"Response from user service: {response.status_code} - {response.text}")
             response.raise_for_status()
 
@@ -57,7 +57,7 @@ class RegisterView(APIView):
             access_token = tokens.get("access_token")
             refresh_token = tokens.get("refresh_token")
 
-            # Test for recieved tokens
+            # Test for received tokens
             if not access_token:
                 logger.error("No access token received from user service")
                 return Response({"message": "Authentication failed, no token received."}, status=400)
@@ -83,7 +83,7 @@ class UnregisterView(APIView):
             # Read JSON
             data = json.loads(request.body)
 
-            # LOGGER : Test Recieved Data
+            # LOGGER : Test received Data
             logger.info(f"Received Unregister Data at auth_service: {data}")
 
             # Test for required fields
@@ -94,7 +94,7 @@ class UnregisterView(APIView):
 
             # Send delete request to User Service
             logger.info(f"Sending data to user service for deletion: {data}")
-            response = requests.delete(f"{USER_SERVICE_URL}/api/users/", json=data)
+            response = requests.delete(f"{USER_SERVICE_URL}/api/users/", json=data, timeout=10)
             logger.info(f"Response from user service: {response.status_code} - {response.text}")
             response.raise_for_status()
 
@@ -134,8 +134,8 @@ class LoginView(APIView):
                 logger.error(f"Missing required fields. Received: {data}")
                 return Response({"message": "Missing required fields"}, status=400)
 
-            # Forward authentication request to User Service
-            response = requests.post(f"{USER_SERVICE_URL}/api/authenticate/", json=data, headers={"Content-Type": "application/json"})
+            # Send post request to User Service
+            response = requests.post(f"{USER_SERVICE_URL}/api/authenticate/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             logger.info(f"Response from user service: {response.status_code}, {response.text}")
 
             # Handle authentication failure
@@ -184,8 +184,8 @@ class LogoutView(APIView):
                 logger.error("Missing refresh token in logout request")
                 return Response({"message": "Missing refresh token"}, status=400)
 
-            # Forward logout request to User Service
-            response = requests.post(f"{USER_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"})
+            # Send post request to User Service
+            response = requests.post(f"{USER_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             logger.info(f"Response from user service: {response.status_code}, {response.text}")
 
             return Response(response.json(), status=response.status_code)
