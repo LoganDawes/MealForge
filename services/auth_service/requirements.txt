@@ -3,6 +3,7 @@ djangorestframework
 django-cors-headers
 django-environ
 gunicorn
+mysqlclient
 psycopg2-binary
 djangorestframework-simplejwt
 requests

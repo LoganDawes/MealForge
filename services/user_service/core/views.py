@@ -2,8 +2,6 @@ import requests
 import json
 import logging
 from django.conf import settings
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
 
 # REST Framework
 from rest_framework.response import Response
@@ -43,21 +41,7 @@ class UserView(APIView):
                 user = serializer.save()
                 logger.info(f"User successfully created: {serializer.validated_data}")
 
-                # Authenticate user immediately
-                authenticated_user = authenticate(username=user.username, password=data["password"])
-                if authenticated_user is None:
-                    logger.error(f"Authentication failed for {user.username} after creation")
-                    return Response({"message": "User created, but authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
-                
-                # Generate JWT tokens
-                refresh = RefreshToken.for_user(authenticated_user)
-                access_token = str(refresh.access_token)
-
-                return Response({
-                    "message": "User created successfully",
-                    "access_token": access_token,
-                    "refresh_token": str(refresh)
-                }, status=status.HTTP_201_CREATED)
+                return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
             
             logger.error(f"User creation failed. Errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -84,21 +68,6 @@ class UserView(APIView):
             if not user:
                 logger.error(f"User {data['username']} not found for deletion")
                 return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-            
-            # Authenticate user
-            authenticated_user = authenticate(username=user.username, password=data["password"])
-            if authenticated_user is None:
-                logger.error(f"Authentication failed for {user.username} after creation")
-                return Response({"message": "User found, but authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Blacklist the refresh token
-            try:
-                token = RefreshToken(data["refresh_token"])
-                token.blacklist()
-                logger.info("Refresh token successfully blacklisted")
-            except Exception as e:
-                logger.error(f"Failed to blacklist token: {str(e)}")
-                return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
 
             # Delete user
             user.delete()
@@ -111,80 +80,6 @@ class UserView(APIView):
             return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Unexpected error during user deletion: {str(e)}")
-            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-@method_decorator(csrf_exempt, name='dispatch')
-class AuthenticateUserView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        try:
-            # Read JSON
-            data = request.data
-
-            # LOGGER: Test received data
-            logger.info(f"Received authentication request at user_service: {data}")
-
-            # Authenticate user
-            user = authenticate(username=data["username"], password=data["password"])
-            if user is None:
-                logger.error(f"Authentication failed for user {data['username']}")
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-
-            logger.info(f"User {data['username']} authenticated successfully. Tokens generated.")
-
-            return Response({
-                "message": "Authentication successful",
-                "access_token": access_token,
-                "refresh_token": str(refresh)
-            }, status=status.HTTP_200_OK)
-
-        # Exception Handling
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON data received for authentication")
-            return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Unexpected error during user authentication: {str(e)}")
-            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-@method_decorator(csrf_exempt, name='dispatch')
-class LogoutUserView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        try:
-            # Read JSON
-            data = request.data
-
-            # LOGGER: Test received data
-            logger.info(f"Received logout request at user_service: {data}")
-
-            # Ensure refresh token is provided
-            if "refresh_token" not in data:
-                logger.error("Missing refresh token in logout request")
-                return Response({"message": "Missing refresh token"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Blacklist the refresh token
-            try:
-                token = RefreshToken(data["refresh_token"])
-                token.blacklist()
-                logger.info("Refresh token successfully blacklisted")
-
-                return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
-            except Exception as e:
-                logger.error(f"Failed to blacklist token: {str(e)}")
-                return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Exception Handling
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON data received for logout")
-            return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Unexpected error during logout: {str(e)}")
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 @method_decorator(csrf_exempt, name='dispatch')

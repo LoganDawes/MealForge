@@ -145,7 +145,7 @@ class GetPreferencesView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Update Preferences: {token}")
+            logger.info(f"Received Token for Get Preferences: {token}")
 
             # Send get request to User service
             response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
