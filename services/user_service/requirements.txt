@@ -7,3 +7,4 @@ psycopg2-binary
 mysqlclient
 djangorestframework-simplejwt
 djangorestframework-simplejwt[redis]
+requests

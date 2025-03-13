@@ -225,7 +225,7 @@ class UserPreferencesView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
             # Log validation errors
-            logger.warning(f"Validation failed for user {request.user.username}: {serializer.errors}")
+            logger.error(f"Validation failed for user {request.user.username}: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Exception Handling
