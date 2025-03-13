@@ -159,3 +159,6 @@ USER_SERVICE_URL = "http://user-service:8000"
 SEARCH_SERVICE_URL = "http://search-service:8000"
 INTEGRATION_SERVICE_URL = "http://integration-service:8000"
 LOGGING_SERVICE_URL = "http://logging-service:8000"
+
+SPOONACULAR_API_KEY = env.str('API_KEY')
+SPOONACULAR_BASE_URL = "https://api.spoonacular.com"

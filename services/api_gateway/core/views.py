@@ -17,6 +17,7 @@ logger = logging.getLogger('django')
 # Get Service's URLs in settings.py
 AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
 USER_SERVICE_URL = settings.USER_SERVICE_URL
+INTEGRATION_SERVICE_URL = settings.INTEGRATION_SERVICE_URL
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterUserView(APIView):
@@ -196,6 +197,52 @@ class UpdatePreferencesView(APIView):
             logger.info(f"Response from User Service: {response.status_code}, {response.text}")
 
             # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class GetRecipeInformationView(APIView):
+    def get(self, request, recipe_id):
+        try:
+            # LOGGER: Test received data
+            logger.info(f"Recieving recipe information for recipe_id: {recipe_id}")
+
+            # Send get request to Integration service
+            response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/recipes/{recipe_id}/", headers= {"Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER: Test response data
+            logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
+
+            # Return response from Integration service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class GetIngredientInformationView(APIView):
+    def get(self, request, ingredient_id):
+        try:
+            # LOGGER: Test received data
+            logger.info(f"Recieving ingredient information for ingredient_id: {ingredient_id}")
+
+            logger.info(f"Full Query Params: {request.query_params}")
+
+            # Send get request to Integration service
+            response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/ingredients/{ingredient_id}/", params=request.query_params, headers= {"Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER: Test response data
+            logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
+
+            # Return response from Integration service
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
