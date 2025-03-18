@@ -130,6 +130,34 @@ class LogoutUserView(APIView):
             return Response({"message": str(e)}, status=500)
         
 @method_decorator(csrf_exempt, name='dispatch')
+class RefreshTokenView(APIView):
+    def post(self, request):
+        try:
+            # Read JSON
+            data = json.loads(request.body)
+
+            # LOGGER: Test received data
+            logger.info(f"Received Data at api_gateway for refresh token: {data}")
+
+            # Send post request to Auth service
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/refresh_token/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
+            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+
+            # LOGGER : Test response data
+            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+
+            # Return response from Auth Service
+            return Response(response.json(), status=response.status_code)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for refresh token")
+            return Response({"message": "Invalid JSON data"}, status=400)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
 class GetPreferencesView(APIView):
     def get(self, request):
         try:

@@ -216,3 +216,33 @@ class LogoutView(APIView):
         except json.JSONDecodeError:
             logger.error("Invalid JSON data received for login")
             return Response({"message": "Invalid JSON data"}, status=400)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class RefreshTokenView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        try:
+            # Read JSON
+            data = json.loads(request.body)
+
+            # LOGGER: Test received data
+            logger.info(f"Received Refresh Token Data: {data}")
+
+            # Test for required fields
+            if "refresh_token" not in data:
+                logger.error("Missing refresh token in request")
+                return Response({"message": "Missing refresh token"}, status=400)
+
+            # Verify and refresh the token
+            refresh_token = RefreshToken(data["refresh_token"])
+            new_access_token = str(refresh_token.access_token)
+
+            return Response({
+                "access_token": new_access_token,
+            }, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for refresh token")
+            return Response({"message": "Invalid JSON data"}, status=400)
