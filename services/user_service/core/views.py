@@ -89,6 +89,11 @@ class UserPreferencesView(APIView):
     # GET Request
     def get(self, request):
         try:
+            # Check if the user is logged in
+            if not request.user.logged_in:
+                logger.error(f"User {request.user.username} is not logged in")
+                return Response({"message": "User is not logged in"}, status=status.HTTP_403_FORBIDDEN)
+            
             # Fetch or create default preferences for the authenticated user
             preferences, created = UserPreferences.objects.get_or_create(user=request.user)
             serializer = UserPreferencesSerializer(preferences)
@@ -106,6 +111,11 @@ class UserPreferencesView(APIView):
     # PUT Request
     def put(self, request):
         try:
+            # Check if the user is logged in
+            if not request.user.logged_in:
+                logger.error(f"User {request.user.username} is not logged in")
+                return Response({"message": "User is not logged in"}, status=status.HTTP_403_FORBIDDEN)
+            
             # Fetch or create default preferences for the authenticated user
             preferences, _ = UserPreferences.objects.get_or_create(user=request.user)
 

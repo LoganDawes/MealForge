@@ -108,11 +108,24 @@ class LogoutUserView(APIView):
             # Read JSON
             data = json.loads(request.body)
 
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
             # LOGGER: Test received data
             logger.info(f"Received Data at api_gateway for logout: {data}")
 
             # Send post request to Auth service
-            response = requests.post(f"{AUTH_SERVICE_URL}/api/logout/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
+            response = requests.post(f"{AUTH_SERVICE_URL}/api/logout/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # LOGGER : Test response data
@@ -286,8 +299,23 @@ class SearchRecipesView(APIView):
             # LOGGER: Test received data
             logger.info(f"Received request at api_gateway for search")
 
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+            else:
+                # Access Token
+                auth_parts = auth_header.split(" ")
+                if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                    logger.error("Invalid Authorization header format")
+                token = auth_parts[1]
+
+            headers = {"Content-Type": "application/json"}
+            if auth_header:
+                headers["Authorization"] = f"Bearer {token}"
+
             # Send get request to Search service
-            response = requests.get(f"{SEARCH_SERVICE_URL}/api/search/recipes/", params=request.query_params, headers= {"Content-Type": "application/json"}, timeout=10)
+            response = requests.get(f"{SEARCH_SERVICE_URL}/api/search/recipes/", params=request.query_params, headers=headers, timeout=10)
             response.raise_for_status()
 
             # LOGGER: Test response data
@@ -308,8 +336,23 @@ class SearchIngredientsView(APIView):
             # LOGGER: Test received data
             logger.info(f"Received request at api_gateway for search")
 
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+            else:
+                # Access Token
+                auth_parts = auth_header.split(" ")
+                if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                    logger.error("Invalid Authorization header format")
+                token = auth_parts[1]
+
+            headers = {"Content-Type": "application/json"}
+            if auth_header:
+                headers["Authorization"] = f"Bearer {token}"
+
             # Send get request to Search service
-            response = requests.get(f"{SEARCH_SERVICE_URL}/api/search/ingredients/", params=request.query_params, headers= {"Content-Type": "application/json"}, timeout=10)
+            response = requests.get(f"{SEARCH_SERVICE_URL}/api/search/ingredients/", params=request.query_params, headers=headers, timeout=10)
             response.raise_for_status()
 
             # LOGGER: Test response data

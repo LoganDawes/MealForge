@@ -168,6 +168,10 @@ class LoginView(APIView):
             if user is None:
                 logger.error(f"Authentication failed for user {data['username']}")
                 return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # Log in user
+                user.logged_in = True
+                user.save()
 
             # Generate JWT tokens
             refresh_token = RefreshToken.for_user(user)
@@ -186,7 +190,7 @@ class LoginView(APIView):
     
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
@@ -197,10 +201,16 @@ class LogoutView(APIView):
             logger.info(f"Received Logout Data at auth_service: {data}")
 
             # Test for required fields
-            if "refresh_token" not in data:
-                logger.error("Missing refresh token in logout request")
-                return Response({"message": "Missing refresh token"}, status=400)
+            if "refresh_token" not in data and "user" not in data:
+                logger.error("Missing refresh token or user in logout request")
+                return Response({"message": "Missing refresh token or user"}, status=400)
 
+            # Log out user
+            user = request.user
+            if user is not None:
+                user.logged_in = False
+                user.save()
+            
             # Blacklist the refresh token
             try:
                 token = RefreshToken(data["refresh_token"])
