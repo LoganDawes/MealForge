@@ -18,6 +18,7 @@ logger = logging.getLogger('django')
 AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
 USER_SERVICE_URL = settings.USER_SERVICE_URL
 INTEGRATION_SERVICE_URL = settings.INTEGRATION_SERVICE_URL
+SEARCH_SERVICE_URL = settings.SEARCH_SERVICE_URL
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterUserView(APIView):
@@ -243,6 +244,50 @@ class GetIngredientInformationView(APIView):
             logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
 
             # Return response from Integration service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class SearchRecipesView(APIView):
+    def get(self, request):
+        try:
+            # LOGGER: Test received data
+            logger.info(f"Received request at api_gateway for search")
+
+            # Send get request to Search service
+            response = requests.get(f"{SEARCH_SERVICE_URL}/api/search/recipes/", params=request.query_params, headers= {"Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER: Test response data
+            logger.info(f"Response from Search Service: {response.status_code}, {response.text}")
+
+            # Return response from Search service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class SearchIngredientsView(APIView):
+    def get(self, request):
+        try:
+            # LOGGER: Test received data
+            logger.info(f"Received request at api_gateway for search")
+
+            # Send get request to Search service
+            response = requests.get(f"{SEARCH_SERVICE_URL}/api/search/ingredients/", params=request.query_params, headers= {"Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER: Test response data
+            logger.info(f"Response from Search Service: {response.status_code}, {response.text}")
+
+            # Return response from Search service
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
