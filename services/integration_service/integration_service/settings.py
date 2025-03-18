@@ -153,12 +153,12 @@ LOGGING = {
 # Disable for production
 CORS_ALLOW_ALL_ORIGINS: True
 
-#URLS
-AUTH_SERVICE_URL = "http://auth-service:8000"
-USER_SERVICE_URL = "http://user-service:8000"
-SEARCH_SERVICE_URL = "http://search-service:8000"
-INTEGRATION_SERVICE_URL = "http://integration-service:8000"
-LOGGING_SERVICE_URL = "http://logging-service:8000"
+# URLS
+AUTH_SERVICE_URL = env.str('AUTH_SERVICE_URL')
+USER_SERVICE_URL = env.str('USER_SERVICE_URL')
+SEARCH_SERVICE_URL = env.str('SEARCH_SERVICE_URL')
+INTEGRATION_SERVICE_URL = env.str('INTEGRATION_SERVICE_URL')
+LOGGING_SERVICE_URL = env.str('LOGGING_SERVICE_URL')
 
 SPOONACULAR_API_KEY = env.str('API_KEY')
-SPOONACULAR_BASE_URL = "https://api.spoonacular.com"
+SPOONACULAR_BASE_URL = env.str('SPOONACULAR_BASE_URL')
