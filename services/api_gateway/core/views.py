@@ -25,7 +25,7 @@ class RegisterUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER : Test received data
             logger.info(f"Received Data at api_gateway for register: {data}")
@@ -53,7 +53,7 @@ class UnregisterUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER : Test received data
             logger.info(f"Received Data at api_gateway for unregister: {data}")
@@ -81,7 +81,7 @@ class LoginUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Received Data at api_gateway for login: {data}")
@@ -106,7 +106,7 @@ class LogoutUserView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # Authorization
             auth_header = request.headers.get('Authorization', None)
@@ -147,7 +147,7 @@ class RefreshTokenView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Received Data at api_gateway for refresh token: {data}")
@@ -226,7 +226,7 @@ class UpdatePreferencesView(APIView):
             logger.info(f"Received Token for Update Preferences: {token}")
 
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Sending Data to User Service for update preferences: {data}")
@@ -359,6 +359,238 @@ class SearchIngredientsView(APIView):
             logger.info(f"Response from Search Service: {response.status_code}, {response.text}")
 
             # Return response from Search service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserRecipesView(APIView):
+    # GET request
+    def get(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Get User Recipes: {token}")
+
+            # Send get request to User service
+            response = requests.get(f"{USER_SERVICE_URL}/api/collections/recipes/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+    # POST request
+    def post(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Add User Recipes: {token}")
+
+            # Read JSON
+            data = request.data
+
+            # LOGGER: Test received data
+            logger.info(f"Sending Data to User Service for add recipes: {data}")
+
+            # Send post request to User service
+            response = requests.post(f"{USER_SERVICE_URL}/api/collections/recipes/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+    # DELETE request
+    def delete(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Remove User Recipes: {token}")
+
+            # Read JSON
+            data = request.data
+
+            # LOGGER: Test received data
+            logger.info(f"Sending Data to User Service for remove recipes: {data}")
+
+            # Send delete request to User service
+            response = requests.delete(f"{USER_SERVICE_URL}/api/collections/recipes/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserIngredientsView(APIView):
+    # GET request
+    def get(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Get User Ingredients: {token}")
+
+            # Send get request to User service
+            response = requests.get(f"{USER_SERVICE_URL}/api/collections/ingredients/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+    # POST request
+    def post(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Add User Ingredients: {token}")
+
+            # Read JSON
+            data = request.data
+
+            # LOGGER: Test received data
+            logger.info(f"Sending Data to User Service for add ingredients: {data}")
+
+            # Send post request to User service
+            response = requests.post(f"{USER_SERVICE_URL}/api/collections/ingredients/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
+            return Response(response.json(), status=response.status_code)
+        
+        # Exception Handling
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {str(e)}")
+            return Response({"message": str(e)}, status=500)
+        
+    # DELETE request
+    def delete(self, request):
+        try:
+            # Authorization
+            auth_header = request.headers.get('Authorization', None)
+            if auth_header is None:
+                logger.info(f"Authorization header missing")
+                return Response({"message": "Authorization header missing"}, status=401)
+
+            # Access Token
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0].lower() != "bearer":
+                logger.error("Invalid Authorization header format")
+                return Response({"message": "Invalid Authorization header format"}, status=401)
+            token = auth_parts[1]
+
+            # LOGGER: Test received token
+            logger.info(f"Received Token for Remove User Ingredients: {token}")
+
+            # Read JSON
+            data = request.data
+
+            # LOGGER: Test received data
+            logger.info(f"Sending Data to User Service for remove ingredients: {data}")
+
+            # Send delete request to User service
+            response = requests.delete(f"{USER_SERVICE_URL}/api/collections/ingredients/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
+            response.raise_for_status()
+
+            # LOGGER : Test response data
+            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+
+            # Return response from User Service
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling

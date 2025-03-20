@@ -10,8 +10,8 @@ from rest_framework import permissions, status
 
 # Models & Serializers
 from django.contrib.auth.models import User
-from .models import UserPreferences
-from .serializers import UserSerializer, UserPreferencesSerializer
+from .models import UserPreferences, UserCollections
+from .serializers import UserSerializer, UserPreferencesSerializer, UserCollectionsSerializer
 
 # CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
@@ -127,5 +127,164 @@ class UserPreferencesView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error updating preferences for user {request.user.username}: {str(e)}")
             return Response({"message": "An error occurred while updating preferences."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class UserRecipesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
+    # GET Request
+    def get(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, created = UserCollections.objects.get_or_create(user=request.user)
+            serializer = UserCollectionsSerializer(collections, fields=['recipes'])
 
+            # LOGGER: Test received data
+            logger.info(f"Retrieved recipes for user {request.user.username} (Created: {created})")
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error retrieving recipes for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while retrieving recipes."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # POST Request
+    def post(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, _ = UserCollections.objects.get_or_create(user=request.user)
+
+            # LOGGER: Test received data
+            logger.info(f"Received add request for user {request.user.username}: {request.data}")
+
+            # Add new recipe to collections
+            new_recipe = request.data.get('recipe')
+            if new_recipe:
+                collections.recipes.append(new_recipe)
+                collections.save()
+
+                # LOGGER: Updated collections
+                logger.info(f"Added recipe for user {request.user.username}: {new_recipe}")
+                return Response({"recipes": collections.recipes}, status=status.HTTP_200_OK)
+            else:
+                logger.error(f"No recipe provided in the request for user {request.user.username}")
+                return Response({"message": "No recipe provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error adding recipe for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while adding recipe."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # DELETE Request
+    def delete(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, _ = UserCollections.objects.get_or_create(user=request.user)
+
+            # LOGGER: Test received data
+            logger.info(f"Received delete request for user {request.user.username}: {request.data}")
+
+            # Remove recipe from collections
+            recipe_to_remove = request.data.get('recipe_id')
+            if recipe_to_remove:
+                if any(recipe.get('id') == recipe_to_remove for recipe in collections.recipes):
+                    collections.recipes = [recipe for recipe in collections.recipes if recipe.get('id') != recipe_to_remove]
+                    collections.save()
+
+                    # LOGGER: Updated collections
+                    logger.info(f"Removed recipe for user {request.user.username}: {recipe_to_remove}")
+                    return Response({"recipes": collections.recipes}, status=status.HTTP_200_OK)
+                else:
+                    logger.error(f"Recipe with id {recipe_to_remove} not found in collections for user {request.user.username}")
+                    return Response({"message": "Recipe not found"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                logger.error(f"No recipe provided in the request for user {request.user.username}")
+                return Response({"message": "No recipe provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exception Handling
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON data received for deletion")
+            return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error removing recipe for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while removing recipe."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserIngredientsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    # GET Request
+    def get(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, created = UserCollections.objects.get_or_create(user=request.user)
+            serializer = UserCollectionsSerializer(collections, fields=['ingredients'])
+
+            # LOGGER: Test received data
+            logger.info(f"Retrieved ingredients for user {request.user.username} (Created: {created})")
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error retrieving ingredients for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while retrieving ingredients."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # POST Request
+    def post(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, _ = UserCollections.objects.get_or_create(user=request.user)
+
+            # LOGGER: Test received data
+            logger.info(f"Received add request for user {request.user.username}: {request.data}")
+
+            # Add new ingredient to collections
+            new_ingredient = request.data.get('ingredient')
+            if new_ingredient:
+                collections.ingredients.append(new_ingredient)
+                collections.save()
+
+                # LOGGER: Updated collections
+                logger.info(f"Added ingredient for user {request.user.username}: {new_ingredient}")
+                return Response({"ingredients": collections.ingredients}, status=status.HTTP_200_OK)
+            else:
+                logger.error(f"No ingredient provided in the request for user {request.user.username}")
+                return Response({"message": "No ingredient provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error adding ingredient for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while adding ingredient."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # DELETE Request
+    def delete(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, _ = UserCollections.objects.get_or_create(user=request.user)
+
+            # LOGGER: Test received data
+            logger.info(f"Received delete request for user {request.user.username}: {request.data}")
+
+            # Remove ingredient from collections
+            ingredient_to_remove = request.data.get('ingredient_id')
+            if ingredient_to_remove:
+                if any(ingredient.get('id') == ingredient_to_remove for ingredient in collections.ingredients):
+                    collections.ingredients = [ingredient for ingredient in collections.ingredients if ingredient.get('id') != ingredient_to_remove]
+                    collections.save()
+
+                    # LOGGER: Updated collections
+                    logger.info(f"Removed ingredient for user {request.user.username}: {ingredient_to_remove}")
+                    return Response({"ingredients": collections.ingredients}, status=status.HTTP_200_OK)
+                else:
+                    logger.error(f"Ingredient with id {ingredient_to_remove} not found in collections for user {request.user.username}")
+                    return Response({"message": "Ingredient not found"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                logger.error(f"No ingredient provided in the request for user {request.user.username}")
+                return Response({"message": "No ingredient provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error removing ingredient for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while removing ingredient."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

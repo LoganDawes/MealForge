@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserPreferences
+from .models import UserPreferences, UserCollections
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,3 +29,18 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
         if value < 0 or value > 9999:
             raise serializers.ValidationError("Calorie limit must be between 0 and 9999.")
         return value
+    
+class UserCollectionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserCollections
+        fields = ["recipes", "ingredients"]
+
+    # Custom init method to filter fields
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+        super(UserCollectionsSerializer, self).__init__(*args, **kwargs)
+        if fields is not None:
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)

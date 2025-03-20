@@ -19,3 +19,16 @@ class UserPreferences(models.Model):
 
     def __str__(self):
         return f"Preferences for {self.user.username}"
+    
+class UserCollections(models.Model):
+    # One-to-one relation with a user
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="collections")
+
+    # Stores a list of favorite recipes
+    recipes = models.JSONField(default=list)
+
+    # Stores a list of favorite ingredients
+    ingredients = models.JSONField(default=list)
+
+    def __str__(self):
+        return f"Collections for {self.user.username}"
