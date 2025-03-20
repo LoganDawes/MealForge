@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Extend the User model to include logged_in field
-User.add_to_class('logged_in', models.BooleanField(default=False))
-
 class UserPreferences(models.Model):
     # One-to-one relation with a user
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="preferences")

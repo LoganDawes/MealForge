@@ -2,10 +2,12 @@ import requests
 import json
 import logging
 from django.conf import settings
+from django.core.cache import cache
 
 # REST Framework
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 # CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
@@ -32,9 +34,21 @@ class RecipeInformationView(APIView):
                 "includeNutrition": 'true'
             }
 
+            # Generate cache key based on recipe_id and query parameters
+            cache_key = f"recipe_information_{recipe_id}_{hash(frozenset(params.items()))}"
+
+            # Check if response is cached
+            cached_response = cache.get(cache_key)
+            if cached_response:
+                logger.info("Returning cached response")
+                return Response(cached_response, status=status.HTTP_200_OK)
+
             # Send get request to Spoonacular
             response = requests.get(url, params=params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
+
+            # Cache the response
+            cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
             logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
@@ -72,9 +86,21 @@ class IngredientInformationView(APIView):
                 "locale": locale,
             }
 
+            # Generate cache key based on ingredient_id and query parameters
+            cache_key = f"ingredient_information_{ingredient_id}_{hash(frozenset(params.items()))}"
+
+            # Check if response is cached
+            cached_response = cache.get(cache_key)
+            if cached_response:
+                logger.info("Returning cached response")
+                return Response(cached_response, status=status.HTTP_200_OK)
+
             # Send get request to Spoonacular
             response = requests.get(url, params=params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
+
+            # Cache the response
+            cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
             logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
@@ -130,9 +156,21 @@ class SearchRecipesView(APIView):
                 if value is not None:
                     params[param] = value
 
+            # Generate cache key based on query parameters
+            cache_key = f"search_recipes_{hash(frozenset(params.items()))}"
+
+            # Check if response is cached
+            cached_response = cache.get(cache_key)
+            if cached_response:
+                logger.info("Returning cached response")
+                return Response(cached_response, status=status.HTTP_200_OK)
+
             # Send get request to Spoonacular
             response = requests.get(url, params=params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
+
+            # Cache the response
+            cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
             logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
@@ -175,9 +213,21 @@ class SearchIngredientsView(APIView):
             if 'query' not in params or not params['query']:
                 params['query'] = 'a'
 
+            # Generate cache key based on query parameters
+            cache_key = f"search_ingredients_{hash(frozenset(params.items()))}"
+
+            # Check if response is cached
+            cached_response = cache.get(cache_key)
+            if cached_response:
+                logger.info("Returning cached response")
+                return Response(cached_response, status=status.HTTP_200_OK)
+
             # Send get request to Spoonacular
             response = requests.get(url, params=params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
+
+            # Cache the response
+            cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
             logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
