@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterUserView, UnregisterUserView, LoginUserView, LogoutUserView, GetPreferencesView, UpdatePreferencesView, GetRecipeInformationView, GetIngredientInformationView, SearchRecipesView, SearchIngredientsView, RefreshTokenView, UserRecipesView, UserIngredientsView
+from .views import RegisterUserView, UnregisterUserView, LoginUserView, LogoutUserView, GetPreferencesView, UpdatePreferencesView, GetRecipeInformationView, GetIngredientInformationView, SearchRecipesView, SearchIngredientsView, RefreshTokenView, UserRecipesView, UserIngredientsView, UpdateUserRecipesView, UpdateUserIngredientsView
 
 urlpatterns = [
     # Basic User Registration and Authentication
@@ -24,5 +24,9 @@ urlpatterns = [
     # User Recipes and Ingredients
     path('user/recipes/', UserRecipesView.as_view(), name='user_recipes'),
     path('user/ingredients/', UserIngredientsView.as_view(), name='user_ingredients'),
+
+    # Update User Recipes and Ingredients
+    path('user/recipes/update/', UpdateUserRecipesView.as_view(), name='update_user_recipes'),
+    path('user/ingredients/update/', UpdateUserIngredientsView.as_view(), name='update_user_ingredients'),
     
 ]

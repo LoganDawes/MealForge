@@ -20,6 +20,9 @@ from django.utils.decorators import method_decorator
 # Initialzes Logger
 logger = logging.getLogger('django')
 
+# Get Service's URLs in settings.py
+INTEGRATION_SERVICE_URL = settings.INTEGRATION_SERVICE_URL
+
 @method_decorator(csrf_exempt, name='dispatch')
 class UserView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -288,3 +291,81 @@ class UserIngredientsView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error removing ingredient for user {request.user.username}: {str(e)}")
             return Response({"message": "An error occurred while removing ingredient."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class UpdateRecipesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, _ = UserCollections.objects.get_or_create(user=request.user)
+            updated_recipes = []
+
+            for recipe in collections.recipes:
+                if set(recipe.keys()) == {'id', 'title', 'image'}:
+                    # Make a GET request to the integrations service to get full recipe information
+                    logger.info(f"Updating recipe {recipe} for user {request.user.username}")
+                    response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/recipes/{recipe['id']}/")
+                    response.raise_for_status()
+
+                    #LOGGER: Test received data
+                    logger.info(f"Response from Integration service: {response.status_code}, {response.text}")
+
+                    if response.status_code == 200:
+                        full_recipe = response.json()
+                        updated_recipes.append(full_recipe)
+                    else:
+                        updated_recipes.append(recipe)
+                else:
+                    logger.info(f"Recipe {recipe} appending without update")
+                    updated_recipes.append(recipe)
+
+            collections.recipes = updated_recipes
+            collections.save()
+
+            logger.info(f"Updated recipes for user {request.user.username}")
+            return Response({"recipes": collections.recipes}, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error updating recipes for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while updating recipes."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class UpdateIngredientsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Fetch or create default collections for the authenticated user
+            collections, _ = UserCollections.objects.get_or_create(user=request.user)
+            updated_ingredients = []
+
+            for ingredient in collections.ingredients:
+                if set(ingredient.keys()) == {'id', 'title', 'image'}:
+                    # Make a GET request to the integrations service to get full ingredient information
+                    response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/ingredients/{ingredient['id']}/")
+                    response.raise_for_status()
+
+                    #LOGGER: Test received data
+                    logger.info(f"Response from Integration service: {response.status_code}, {response.text}")
+                    
+                    if response.status_code == 200:
+                        full_ingredient = response.json()
+                        updated_ingredients.append(full_ingredient)
+                    else:
+                        updated_ingredients.append(ingredient)
+                else:
+                    updated_ingredients.append(ingredient)
+
+            collections.ingredients = updated_ingredients
+            collections.save()
+
+            logger.info(f"Updated ingredients for user {request.user.username}")
+            return Response({"ingredients": collections.ingredients}, status=status.HTTP_200_OK)
+
+        # Exception Handling
+        except Exception as e:
+            logger.error(f"Unexpected error updating ingredients for user {request.user.username}: {str(e)}")
+            return Response({"message": "An error occurred while updating ingredients."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
