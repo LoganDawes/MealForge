@@ -8,3 +8,6 @@ mysqlclient
 djangorestframework-simplejwt
 djangorestframework-simplejwt[redis]
 requests
+celery
+django-celery-beat
+redis
