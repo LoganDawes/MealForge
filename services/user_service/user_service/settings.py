@@ -12,11 +12,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from .logging_handler import CustomHTTPHandler
+import json
 import environ
+import logging
 
 # Initialize environment variables
 env = environ.Env()
-# environ.Env.read_env()
 environ.Env.read_env(env_file=Path(__file__).resolve().parent.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -166,19 +168,60 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+class LogFormatter(logging.Formatter):
+    def format(self, record):
+        try:
+            record.service_name = 'User Management Service'
+            return json.dumps({
+            'service_name': record.service_name,
+            'log_level': record.levelname,
+            'message': record.getMessage()
+        })
+        except Exception as e:
+            record.message = f"Error formatting log record: {e}"
+            return super().format(record)
+        
+class ConsoleLogFormatter(logging.Formatter):
+    def format(self, record):
+        try:
+            record.service_name = 'User Management Service'
+            return super().format(record)
+        except Exception as e:
+            record.message = f"Error formatting log record: {e}"
+            return super().format(record)
+
 # Logging Settings
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'custom': {
+            '()': LogFormatter,
+            'format': '%(service_name)s - %(levelname)s - %(message)s',
+        },
+        'console': {
+            '()': ConsoleLogFormatter,
+            'format': '%(service_name)s - %(levelname)s - %(message)s',
+        }
+    },
     'handlers': {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+        'http': {
+            'level': 'WARNING',
+            'class': 'user_service.logging_handler.CustomHTTPHandler',
+            'host': env.str('LOGGING_HOST'),
+            'url': env.str('LOGGING_ENDPOINT'),
+            'method': 'POST',
+            'formatter': 'custom',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'http'],
             'level': 'INFO',
             'propagate': True,
         },

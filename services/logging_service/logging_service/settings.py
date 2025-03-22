@@ -12,10 +12,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import environ
+import logging
 
 # Initialize environment variables
 env = environ.Env()
-environ.Env.read_env()
+environ.Env.read_env(env_file=Path(__file__).resolve().parent.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -141,14 +142,30 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+class ConsoleLogFormatter(logging.Formatter):
+    def format(self, record):
+        try:
+            record.service_name = 'Logging Service'
+            return super().format(record)
+        except Exception as e:
+            record.message = f"Error formatting log record: {e}"
+            return super().format(record)
+
 # Logging Settings
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            '()': ConsoleLogFormatter,
+            'format': '%(service_name)s - %(levelname)s - %(message)s',
+        }
+    },
     'handlers': {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'console',
         },
     },
     'loggers': {
