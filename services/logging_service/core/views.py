@@ -24,7 +24,7 @@ class LogView(APIView):
             # Validate Log creation
             if serializer.is_valid():
                 serializer.save()
-                logger.info(f"Log created: {serializer.data.service_name} - {serializer.data.log_level}")
+                logger.info(f"Log created: {serializer.data['service_name']} - {serializer.data['log_level']}")
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
             logger.error(f"Log creation failed. Errors: {serializer.errors}")
@@ -32,5 +32,5 @@ class LogView(APIView):
         
         # Exception Handling
         except Exception as e:
-            logger.exception(f"Exception occurred: {str(e)}")
+            logger.error(f"Exception occurred: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

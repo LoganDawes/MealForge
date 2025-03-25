@@ -34,7 +34,7 @@ class UserView(APIView):
             data = request.data
 
             # LOGGER : Test received Data
-            logger.info(f"Received Data for user creation: {data}")
+            logger.info(f"Received Data for user creation")
 
             # Use User Serializer to create User
             serializer = UserSerializer(data=data)
@@ -42,7 +42,7 @@ class UserView(APIView):
             # Validate User Creation
             if serializer.is_valid():
                 user = serializer.save()
-                logger.info(f"User successfully created: {serializer.validated_data}")
+                logger.info(f"User successfully created")
 
                 return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
             
@@ -64,7 +64,7 @@ class UserView(APIView):
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Received Data for user deletion: {data}")
+            logger.info(f"Received Data for user deletion")
 
             # Retrieve user
             user = User.objects.filter(username=data["username"]).first()
@@ -113,7 +113,7 @@ class UserPreferencesView(APIView):
             preferences, _ = UserPreferences.objects.get_or_create(user=request.user)
 
             # LOGGER: Test received data
-            logger.info(f"Received update request for user {request.user.username}: {request.data}")
+            logger.info(f"Received update request for user {request.user.username}")
 
             # Validate and update preferences
             serializer = UserPreferencesSerializer(preferences, data=request.data, partial=True)
@@ -159,7 +159,7 @@ class UserRecipesView(APIView):
             collections, _ = UserCollections.objects.get_or_create(user=request.user)
 
             # LOGGER: Test received data
-            logger.info(f"Received add request for user {request.user.username}: {request.data}")
+            logger.info(f"Received add request for user {request.user.username}")
 
             # Add new recipe to collections
             new_recipe = request.data.get('recipe')
@@ -168,7 +168,7 @@ class UserRecipesView(APIView):
                 collections.save()
 
                 # LOGGER: Updated collections
-                logger.info(f"Added recipe for user {request.user.username}: {new_recipe}")
+                logger.info(f"Added recipe for user {request.user.username}: {new_recipe.get('title')}")
                 return Response({"recipes": collections.recipes}, status=status.HTTP_200_OK)
             else:
                 logger.error(f"No recipe provided in the request for user {request.user.username}")
@@ -186,7 +186,7 @@ class UserRecipesView(APIView):
             collections, _ = UserCollections.objects.get_or_create(user=request.user)
 
             # LOGGER: Test received data
-            logger.info(f"Received delete request for user {request.user.username}: {request.data}")
+            logger.info(f"Received delete request for user {request.user.username}")
 
             # Remove recipe from collections
             recipe_to_remove = request.data.get('recipe_id')
@@ -196,7 +196,7 @@ class UserRecipesView(APIView):
                     collections.save()
 
                     # LOGGER: Updated collections
-                    logger.info(f"Removed recipe for user {request.user.username}: {recipe_to_remove}")
+                    logger.info(f"Removed recipe for user {request.user.username}")
                     return Response({"recipes": collections.recipes}, status=status.HTTP_200_OK)
                 else:
                     logger.error(f"Recipe with id {recipe_to_remove} not found in collections for user {request.user.username}")
@@ -241,7 +241,7 @@ class UserIngredientsView(APIView):
             collections, _ = UserCollections.objects.get_or_create(user=request.user)
 
             # LOGGER: Test received data
-            logger.info(f"Received add request for user {request.user.username}: {request.data}")
+            logger.info(f"Received add request for user {request.user.username}")
 
             # Add new ingredient to collections
             new_ingredient = request.data.get('ingredient')
@@ -250,7 +250,7 @@ class UserIngredientsView(APIView):
                 collections.save()
 
                 # LOGGER: Updated collections
-                logger.info(f"Added ingredient for user {request.user.username}: {new_ingredient}")
+                logger.info(f"Added ingredient for user {request.user.username}: {new_ingredient.get('name')}")
                 return Response({"ingredients": collections.ingredients}, status=status.HTTP_200_OK)
             else:
                 logger.error(f"No ingredient provided in the request for user {request.user.username}")
@@ -268,7 +268,7 @@ class UserIngredientsView(APIView):
             collections, _ = UserCollections.objects.get_or_create(user=request.user)
 
             # LOGGER: Test received data
-            logger.info(f"Received delete request for user {request.user.username}: {request.data}")
+            logger.info(f"Received delete request for user {request.user.username}")
 
             # Remove ingredient from collections
             ingredient_to_remove = request.data.get('ingredient_id')
@@ -278,7 +278,7 @@ class UserIngredientsView(APIView):
                     collections.save()
 
                     # LOGGER: Updated collections
-                    logger.info(f"Removed ingredient for user {request.user.username}: {ingredient_to_remove}")
+                    logger.info(f"Removed ingredient for user {request.user.username}")
                     return Response({"ingredients": collections.ingredients}, status=status.HTTP_200_OK)
                 else:
                     logger.error(f"Ingredient with id {ingredient_to_remove} not found in collections for user {request.user.username}")
@@ -305,12 +305,12 @@ class UpdateRecipesView(APIView):
             for recipe in collections.recipes:
                 if set(recipe.keys()) == {'id', 'title', 'image'}:
                     # Make a GET request to the integrations service to get full recipe information
-                    logger.info(f"Updating recipe {recipe} for user {request.user.username}")
+                    logger.info(f"Updating recipe for user {request.user.username}")
                     response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/recipes/{recipe['id']}/")
                     response.raise_for_status()
 
                     #LOGGER: Test received data
-                    logger.info(f"Response from Integration service: {response.status_code}, {response.text}")
+                    logger.info(f"Response from Integration service: {response.status_code} - {response.text}")
 
                     if response.status_code == 200:
                         full_recipe = response.json()
@@ -318,7 +318,7 @@ class UpdateRecipesView(APIView):
                     else:
                         updated_recipes.append(recipe)
                 else:
-                    logger.info(f"Recipe {recipe} appending without update")
+                    logger.info(f"Recipe appending without update")
                     updated_recipes.append(recipe)
 
             collections.recipes = updated_recipes
@@ -349,7 +349,7 @@ class UpdateIngredientsView(APIView):
                     response.raise_for_status()
 
                     #LOGGER: Test received data
-                    logger.info(f"Response from Integration service: {response.status_code}, {response.text}")
+                    logger.info(f"Response from Integration service: {response.status_code} - {response.text}")
                     
                     if response.status_code == 200:
                         full_ingredient = response.json()

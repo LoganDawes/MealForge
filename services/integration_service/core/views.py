@@ -50,7 +50,7 @@ class RecipeInformationView(APIView):
             cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
-            logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
+            logger.info(f"Response from Spoonacular: {response.status_code} - {response.json().get('title')}")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
@@ -67,14 +67,10 @@ class IngredientInformationView(APIView):
             # LOGGER: Test received data
             logger.info(f"Receiving ingredient information for ingredient_id: {ingredient_id}")
 
-            logger.info(f"Full Query Params: {request.query_params}")
-
             # Extract optional query parameters
             amount = request.query_params.get("amount", 1)
             unit = request.query_params.get("unit", "grams")
             locale = request.query_params.get("locale", "en_US")
-
-            logger.info(f"Extracted Params - Amount: {amount}, Unit: {unit}, Locale: {locale}")
 
             # Construct API request URL
             url = f"{SPOONACULAR_BASE_URL}/food/ingredients/{ingredient_id}/information"
@@ -102,7 +98,7 @@ class IngredientInformationView(APIView):
             cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
-            logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
+            logger.info(f"Response from Spoonacular: {response.status_code} - {response.json().get('name')}")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
@@ -116,9 +112,6 @@ class IngredientInformationView(APIView):
 class SearchRecipesView(APIView):
     def get(self, request):
         try:
-            # LOGGER: Test received data
-            logger.info(f"Full Query Params: {request.query_params}")
-
             # Construct API request URL
             url = f"{SPOONACULAR_BASE_URL}/recipes/complexSearch"
             params = {
@@ -172,7 +165,7 @@ class SearchRecipesView(APIView):
             cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
-            logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
+            logger.info(f"Response from Spoonacular: {response.status_code} - {response.json().get('totalResults')} results")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
@@ -186,9 +179,6 @@ class SearchRecipesView(APIView):
 class SearchIngredientsView(APIView):
     def get(self, request):
         try:
-            # LOGGER: Test received data
-            logger.info(f"Full Query Params: {request.query_params}")
-
             # Construct API request URL
             url = f"{SPOONACULAR_BASE_URL}/food/ingredients/search"
             params = {
@@ -229,7 +219,7 @@ class SearchIngredientsView(APIView):
             cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
-            logger.info(f"Response from Spoonacular: {response.status_code}, {response.text}")
+            logger.info(f"Response from Spoonacular: {response.status_code} - {response.json().get('totalResults')} results")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)

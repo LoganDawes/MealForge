@@ -28,14 +28,14 @@ class RegisterUserView(APIView):
             data = request.data
 
             # LOGGER : Test received data
-            logger.info(f"Received Data at api_gateway for register: {data}")
+            logger.info(f"Received Data at api_gateway for register")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/register/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Auth Service: {response.status_code} - {response.json().get('message')}")
 
             # Return response from Auth service
             return Response(response.json(), status=response.status_code)
@@ -56,14 +56,14 @@ class UnregisterUserView(APIView):
             data = request.data
 
             # LOGGER : Test received data
-            logger.info(f"Received Data at api_gateway for unregister: {data}")
+            logger.info(f"Received Data at api_gateway for unregister")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/unregister/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Auth Service: {response.status_code} - {response.text}")
 
             # Return response from Auth service
             return Response(response.json(), status=response.status_code)
@@ -84,11 +84,11 @@ class LoginUserView(APIView):
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Received Data at api_gateway for login: {data}")
+            logger.info(f"Received Data at api_gateway for login")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/login/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Auth Service: {response.status_code} - {response.json().get('message')}")
 
             # Return response from Auth Service
             return Response(response.json(), status=response.status_code)
@@ -111,7 +111,7 @@ class LogoutUserView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -122,14 +122,13 @@ class LogoutUserView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received data
-            logger.info(f"Received Data at api_gateway for logout: {data}")
+            logger.info(f"Received Data at api_gateway for logout")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/logout/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # LOGGER : Test response data
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Auth Service: {response.status_code} - {response.text}")
 
             # Return response from Auth Service
             return Response(response.json(), status=response.status_code)
@@ -150,14 +149,13 @@ class RefreshTokenView(APIView):
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Received Data at api_gateway for refresh token: {data}")
+            logger.info(f"Received Data at api_gateway for refresh token")
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/refresh_token/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
 
             # LOGGER : Test response data
-            logger.info(f"Response from Auth Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Auth Service: {response.status_code} - {response.json().get('message')}")
 
             # Return response from Auth Service
             return Response(response.json(), status=response.status_code)
@@ -177,7 +175,7 @@ class GetPreferencesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -188,14 +186,14 @@ class GetPreferencesView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Get Preferences: {token}")
+            logger.info(f"Received Token for Get Preferences")
 
             # Send get request to User service
             response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from User Service: {response.status_code} - {response.text}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -212,7 +210,7 @@ class UpdatePreferencesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -223,20 +221,20 @@ class UpdatePreferencesView(APIView):
             token = auth_parts[1]
             
             # LOGGER: Test received token
-            logger.info(f"Received Token for Update Preferences: {token}")
+            logger.info(f"Received Token for Update Preferences")
 
             # Read JSON
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Sending Data to User Service for update preferences: {data}")
+            logger.info(f"Sending Data to User Service for update preferences")
 
             # Send put request to User service
             response = requests.put(f"{USER_SERVICE_URL}/api/preferences/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from User Service: {response.status_code} - {response.text}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -261,7 +259,7 @@ class GetRecipeInformationView(APIView):
             response.raise_for_status()
 
             # LOGGER: Test response data
-            logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Integration Service: {response.status_code} - {response.json().get('title')}")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
@@ -278,14 +276,12 @@ class GetIngredientInformationView(APIView):
             # LOGGER: Test received data
             logger.info(f"Recieving ingredient information for ingredient_id: {ingredient_id}")
 
-            logger.info(f"Full Query Params: {request.query_params}")
-
             # Send get request to Integration service
             response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/ingredients/{ingredient_id}/", params=request.query_params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER: Test response data
-            logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Integration Service: {response.status_code} - {response.json().get('name')}")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
@@ -300,7 +296,7 @@ class SearchRecipesView(APIView):
     def get(self, request):
         try:
             # LOGGER: Test received data
-            logger.info(f"Received request at api_gateway for search")
+            logger.info(f"Received request at api_gateway for recipe search")
 
             # Authorization
             auth_header = request.headers.get('Authorization', None)
@@ -322,7 +318,7 @@ class SearchRecipesView(APIView):
             response.raise_for_status()
 
             # LOGGER: Test response data
-            logger.info(f"Response from Search Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Search Service: {response.status_code} - {response.json().get('totalResults')} results")
 
             # Return response from Search service
             return Response(response.json(), status=response.status_code)
@@ -337,7 +333,7 @@ class SearchIngredientsView(APIView):
     def get(self, request):
         try:
             # LOGGER: Test received data
-            logger.info(f"Received request at api_gateway for search")
+            logger.info(f"Received request at api_gateway for ingredient search")
 
             # Authorization
             auth_header = request.headers.get('Authorization', None)
@@ -359,7 +355,7 @@ class SearchIngredientsView(APIView):
             response.raise_for_status()
 
             # LOGGER: Test response data
-            logger.info(f"Response from Search Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Search Service: {response.status_code} - {response.json().get('totalResults')} results")
 
             # Return response from Search service
             return Response(response.json(), status=response.status_code)
@@ -377,7 +373,7 @@ class UserRecipesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -388,14 +384,16 @@ class UserRecipesView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Get User Recipes: {token}")
+            logger.info(f"Received Token for Get User Recipes")
 
             # Send get request to User service
             response = requests.get(f"{USER_SERVICE_URL}/api/collections/recipes/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            recipes = response.json().get('recipes', [])
+            titles = [recipe.get('title') for recipe in recipes]
+            logger.info(f"Response from User Service: {response.status_code} - {titles}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -411,7 +409,7 @@ class UserRecipesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -422,20 +420,22 @@ class UserRecipesView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Add User Recipes: {token}")
+            logger.info(f"Received Token for Add User Recipes")
 
             # Read JSON
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Sending Data to User Service for add recipes: {data}")
+            logger.info(f"Sending Data to User Service for add recipes")
 
             # Send post request to User service
             response = requests.post(f"{USER_SERVICE_URL}/api/collections/recipes/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            recipes = response.json().get('recipes', [])
+            titles = [recipe.get('title') for recipe in recipes]
+            logger.info(f"Response from User Service: {response.status_code} - {titles}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -454,7 +454,7 @@ class UserRecipesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -465,20 +465,22 @@ class UserRecipesView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Remove User Recipes: {token}")
+            logger.info(f"Received Token for Remove User Recipes")
 
             # Read JSON
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Sending Data to User Service for remove recipes: {data}")
+            logger.info(f"Sending Data to User Service for remove recipes")
 
             # Send delete request to User service
             response = requests.delete(f"{USER_SERVICE_URL}/api/collections/recipes/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            recipes = response.json().get('recipes', [])
+            titles = [recipe.get('title') for recipe in recipes]
+            logger.info(f"Response from User Service: {response.status_code} - {titles}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -499,7 +501,7 @@ class UserIngredientsView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -510,14 +512,16 @@ class UserIngredientsView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Get User Ingredients: {token}")
+            logger.info(f"Received Token for Get User Ingredients")
 
             # Send get request to User service
             response = requests.get(f"{USER_SERVICE_URL}/api/collections/ingredients/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            ingredients = response.json().get('ingredients', [])
+            names = [ingredient.get('name') for ingredient in ingredients]
+            logger.info(f"Response from User Service: {response.status_code} - {names}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -533,7 +537,7 @@ class UserIngredientsView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -544,20 +548,22 @@ class UserIngredientsView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Add User Ingredients: {token}")
+            logger.info(f"Received Token for Add User Ingredients")
 
             # Read JSON
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Sending Data to User Service for add ingredients: {data}")
+            logger.info(f"Sending Data to User Service for add ingredients")
 
             # Send post request to User service
             response = requests.post(f"{USER_SERVICE_URL}/api/collections/ingredients/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            ingredients = response.json().get('ingredients', [])
+            names = [ingredient.get('name') for ingredient in ingredients]
+            logger.info(f"Response from User Service: {response.status_code} - {names}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -576,7 +582,7 @@ class UserIngredientsView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -587,20 +593,22 @@ class UserIngredientsView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Remove User Ingredients: {token}")
+            logger.info(f"Received Token for Remove User Ingredients")
 
             # Read JSON
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Sending Data to User Service for remove ingredients: {data}")
+            logger.info(f"Sending Data to User Service for remove ingredients")
 
             # Send delete request to User service
             response = requests.delete(f"{USER_SERVICE_URL}/api/collections/ingredients/", json=data, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            ingredients = response.json().get('ingredients', [])
+            names = [ingredient.get('name') for ingredient in ingredients]
+            logger.info(f"Response from User Service: {response.status_code} - {names}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -620,7 +628,7 @@ class UpdateUserRecipesView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -631,14 +639,16 @@ class UpdateUserRecipesView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Update User Recipes: {token}")
+            logger.info(f"Received Token for Update User Recipes")
 
             # Send get request to User service
             response = requests.get(f"{USER_SERVICE_URL}/api/collections/recipes/update/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            recipes = response.json().get('recipes', [])
+            titles = [recipe.get('title') for recipe in recipes]
+            logger.info(f"Response from User Service: {response.status_code} - {titles}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)
@@ -655,7 +665,7 @@ class UpdateUserIngredientsView(APIView):
             # Authorization
             auth_header = request.headers.get('Authorization', None)
             if auth_header is None:
-                logger.info(f"Authorization header missing")
+                logger.error(f"Authorization header missing")
                 return Response({"message": "Authorization header missing"}, status=401)
 
             # Access Token
@@ -666,14 +676,16 @@ class UpdateUserIngredientsView(APIView):
             token = auth_parts[1]
 
             # LOGGER: Test received token
-            logger.info(f"Received Token for Update User Ingredients: {token}")
+            logger.info(f"Received Token for Update User Ingredients")
 
             # Send get request to User service
             response = requests.get(f"{USER_SERVICE_URL}/api/collections/ingredients/update/", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER : Test response data
-            logger.info(f"Response from User Service: {response.status_code}, {response.text}")
+            ingredients = response.json().get('ingredients', [])
+            names = [ingredient.get('name') for ingredient in ingredients]
+            logger.info(f"Response from User Service: {response.status_code} - {names}")
 
             # Return response from User Service
             return Response(response.json(), status=response.status_code)

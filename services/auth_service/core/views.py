@@ -32,16 +32,16 @@ class RegisterView(APIView):
             data = request.data
 
             # LOGGER : Test received Data
-            logger.info(f"Received Register Data at auth_service: {data}")
+            logger.info(f"Received Register Data at auth_service")
 
             # Test for required fields
             required_fields = {"username", "email", "password"}
             if not required_fields.issubset(data):
-                logger.error(f"Missing required fields. Received: {data}")
+                logger.error(f"Missing required fields for registration")
                 return Response({"message": "Missing required fields"}, status=400)
 
             # Send post request to User Service
-            logger.info(f"Sending data to user service for registering: {data}")
+            logger.info(f"Sending data to user service for registering")
             response = requests.post(f"{USER_SERVICE_URL}/api/users/", json=data, timeout=10)
             logger.info(f"Response from user service: {response.status_code} - {response.text}")
             response.raise_for_status()
@@ -72,7 +72,7 @@ class RegisterView(APIView):
 
             # If user creation failed
             else:
-                logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.json()}")
+                logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.text}")
                 return Response(response.json(), status=response.status_code)
 
         # Exception Handling
@@ -93,12 +93,12 @@ class UnregisterView(APIView):
             data = request.data
 
             # LOGGER : Test received Data
-            logger.info(f"Received Unregister Data at auth_service: {data}")
+            logger.info(f"Received Unregister Data at auth_service")
 
             # Test for required fields
             required_fields = {"username", "password", "refresh_token"}
             if not required_fields.issubset(data):
-                logger.error(f"Missing required fields. Received: {data}")
+                logger.error(f"Missing required fields for unregistration")
                 return Response({"message": "Missing required fields"}, status=400)
             
             # Retrieve user
@@ -126,7 +126,7 @@ class UnregisterView(APIView):
             OutstandingToken.objects.filter(user=user).delete()
 
             # Send delete request to User Service
-            logger.info(f"Sending data to user service for deletion: {data}")
+            logger.info(f"Sending data to user service for deletion")
             response = requests.delete(f"{USER_SERVICE_URL}/api/users/", json=data, timeout=10)
             logger.info(f"Response from user service: {response.status_code} - {response.text}")
             response.raise_for_status()
@@ -137,7 +137,7 @@ class UnregisterView(APIView):
             
             # If user deletion failed
             else:
-                logger.error(f"Failed to unregister user {data['username']}. Response from user service: {response.json()}")
+                logger.error(f"Failed to unregister user {data['username']}. Response from user service: {response.status_code} - {response.text}")
                 return Response(response.json(), status=response.status_code)
 
         # Exception Handling
@@ -158,12 +158,12 @@ class LoginView(APIView):
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Received Login Data at auth_service: {data}")
+            logger.info(f"Received Login Data at auth_service")
 
             # Test for required fields
             required_fields = {"username", "password"}
             if not required_fields.issubset(data):
-                logger.error(f"Missing required fields. Received: {data}")
+                logger.error(f"Missing required fields for login")
                 return Response({"message": "Missing required fields"}, status=400)
 
             # Authenticate user
@@ -197,7 +197,7 @@ class LogoutView(APIView):
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Received Logout Data at auth_service: {data}")
+            logger.info(f"Received Logout Data at auth_service")
 
             # Test for required fields
             if "refresh_token" not in data and "user" not in data:
@@ -230,7 +230,7 @@ class RefreshTokenView(APIView):
             data = request.data
 
             # LOGGER: Test received data
-            logger.info(f"Received Refresh Token Data: {data}")
+            logger.info(f"Received Refresh Token Data at auth_service")
 
             # Test for required fields
             if "refresh_token" not in data:
@@ -242,6 +242,7 @@ class RefreshTokenView(APIView):
             new_access_token = str(refresh_token.access_token)
 
             return Response({
+                "message": "Token refreshed successfully",
                 "access_token": new_access_token,
             }, status=status.HTTP_200_OK)
 

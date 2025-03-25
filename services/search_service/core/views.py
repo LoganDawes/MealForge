@@ -30,13 +30,11 @@ class SearchRecipesView(APIView):
             # Fetch user preferences if authorization header is present
             auth_header = request.headers.get('Authorization')
             if auth_header:
-                logger.info(f"Authorization header present: {auth_header}")
+                logger.info(f"Authorization header present for search")
                 try:
                     user_preferences_response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": auth_header}, timeout=10)
                     user_preferences_response.raise_for_status()
                     user_preferences = user_preferences_response.json()
-
-                    logger.info(f"User preferences: {user_preferences}")
 
                     # Map user preferences to query parameters
                     if 'diets' in user_preferences:
@@ -48,14 +46,14 @@ class SearchRecipesView(APIView):
                 except requests.exceptions.RequestException as e:
                     logger.error(f"Failed to fetch user preferences: {str(e)}")
             else:
-                logger.info("Authorization header not present")
+                logger.info("Authorization header not present in search")
 
             # Send get request to Integration service
             response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/search/recipes/", params=query_params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER: Test response data
-            logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Integration Service: {response.status_code} - {response.json().get('totalResults')} results")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
@@ -78,13 +76,11 @@ class SearchIngredientsView(APIView):
             # Fetch user preferences if authorization header is present
             auth_header = request.headers.get('Authorization')
             if auth_header:
-                logger.info(f"Authorization header present: {auth_header}")
+                logger.info(f"Authorization header present in search")
                 try:
                     user_preferences_response = requests.get(f"{USER_SERVICE_URL}/api/preferences/", headers={"Authorization": auth_header}, timeout=10)
                     user_preferences_response.raise_for_status()
                     user_preferences = user_preferences_response.json()
-
-                    logger.info(f"User preferences: {user_preferences}")
 
                     # Map user preferences to query parameters
                     if 'intolerances' in user_preferences:
@@ -94,14 +90,14 @@ class SearchIngredientsView(APIView):
                 except requests.exceptions.RequestException as e:
                     logger.error(f"Failed to fetch user preferences: {str(e)}")
             else:
-                logger.info("Authorization header not present")
+                logger.info("Authorization header not present in search")
 
             # Send get request to Integration service
             response = requests.get(f"{INTEGRATION_SERVICE_URL}/api/search/ingredients/", params=query_params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # LOGGER: Test response data
-            logger.info(f"Response from Integration Service: {response.status_code}, {response.text}")
+            logger.info(f"Response from Integration Service: {response.status_code} - {response.json().get('totalResults')} results")
 
             # Return response from Integration service
             return Response(response.json(), status=response.status_code)
