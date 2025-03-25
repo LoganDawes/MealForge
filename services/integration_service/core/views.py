@@ -8,10 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-# CSRF Exemption
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
 # Initialzes Logger
 logger = logging.getLogger('django')
 
@@ -19,7 +15,6 @@ logger = logging.getLogger('django')
 SPOONACULAR_API_KEY = settings.SPOONACULAR_API_KEY
 SPOONACULAR_BASE_URL = settings.SPOONACULAR_BASE_URL
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RecipeInformationView(APIView):
     def get(self, request, recipe_id):
         try:
@@ -60,7 +55,7 @@ class RecipeInformationView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
     
-@method_decorator(csrf_exempt, name='dispatch')
+
 class IngredientInformationView(APIView):
     def get(self, request, ingredient_id):
         try:
@@ -108,7 +103,7 @@ class IngredientInformationView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class SearchRecipesView(APIView):
     def get(self, request):
         try:
@@ -175,7 +170,7 @@ class SearchRecipesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class SearchIngredientsView(APIView):
     def get(self, request):
         try:

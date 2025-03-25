@@ -13,17 +13,12 @@ from django.contrib.auth.models import User
 from .models import UserPreferences, UserCollections
 from .serializers import UserSerializer, UserPreferencesSerializer, UserCollectionsSerializer
 
-# CSRF Exemption
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
 # Initialzes Logger
 logger = logging.getLogger('django')
 
 # Get Service's URLs in settings.py
 INTEGRATION_SERVICE_URL = settings.INTEGRATION_SERVICE_URL
 
-@method_decorator(csrf_exempt, name='dispatch')
 class UserView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -85,7 +80,7 @@ class UserView(APIView):
             logger.error(f"Unexpected error during user deletion: {str(e)}")
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -131,7 +126,7 @@ class UserPreferencesView(APIView):
             logger.error(f"Unexpected error updating preferences for user {request.user.username}: {str(e)}")
             return Response({"message": "An error occurred while updating preferences."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UserRecipesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -213,7 +208,7 @@ class UserRecipesView(APIView):
             logger.error(f"Unexpected error removing recipe for user {request.user.username}: {str(e)}")
             return Response({"message": "An error occurred while removing recipe."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UserIngredientsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -292,7 +287,7 @@ class UserIngredientsView(APIView):
             logger.error(f"Unexpected error removing ingredient for user {request.user.username}: {str(e)}")
             return Response({"message": "An error occurred while removing ingredient."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UpdateRecipesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -332,7 +327,7 @@ class UpdateRecipesView(APIView):
             logger.error(f"Unexpected error updating recipes for user {request.user.username}: {str(e)}")
             return Response({"message": "An error occurred while updating recipes."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UpdateIngredientsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

@@ -7,10 +7,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError
 
-# CSRF Exemption
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
 # Initialzes Logger
 logger = logging.getLogger('django')
 
@@ -20,7 +16,6 @@ USER_SERVICE_URL = settings.USER_SERVICE_URL
 INTEGRATION_SERVICE_URL = settings.INTEGRATION_SERVICE_URL
 SEARCH_SERVICE_URL = settings.SEARCH_SERVICE_URL
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RegisterUserView(APIView):
     def post(self, request):
         try:
@@ -48,7 +43,7 @@ class RegisterUserView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UnregisterUserView(APIView):
     def post(self, request):
         try:
@@ -76,7 +71,7 @@ class UnregisterUserView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
     
-@method_decorator(csrf_exempt, name='dispatch')
+
 class LoginUserView(APIView):
     def post(self, request):
         try:
@@ -101,7 +96,7 @@ class LoginUserView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
     
-@method_decorator(csrf_exempt, name='dispatch')
+
 class LogoutUserView(APIView):
     def post(self, request):
         try:
@@ -141,7 +136,7 @@ class LogoutUserView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class RefreshTokenView(APIView):
     def post(self, request):
         try:
@@ -168,7 +163,7 @@ class RefreshTokenView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class GetPreferencesView(APIView):
     def get(self, request):
         try:
@@ -203,7 +198,7 @@ class GetPreferencesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UpdatePreferencesView(APIView):
     def put(self, request):
         try:
@@ -247,7 +242,7 @@ class UpdatePreferencesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class GetRecipeInformationView(APIView):
     def get(self, request, recipe_id):
         try:
@@ -269,7 +264,7 @@ class GetRecipeInformationView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class GetIngredientInformationView(APIView):
     def get(self, request, ingredient_id):
         try:
@@ -291,7 +286,7 @@ class GetIngredientInformationView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class SearchRecipesView(APIView):
     def get(self, request):
         try:
@@ -328,7 +323,7 @@ class SearchRecipesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class SearchIngredientsView(APIView):
     def get(self, request):
         try:
@@ -365,7 +360,7 @@ class SearchIngredientsView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UserRecipesView(APIView):
     # GET request
     def get(self, request):
@@ -493,7 +488,7 @@ class UserRecipesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UserIngredientsView(APIView):
     # GET request
     def get(self, request):
@@ -621,7 +616,7 @@ class UserIngredientsView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UpdateUserRecipesView(APIView):
     def get(self, request):
         try:
@@ -658,7 +653,7 @@ class UpdateUserRecipesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UpdateUserIngredientsView(APIView):
     def get(self, request):
         try:

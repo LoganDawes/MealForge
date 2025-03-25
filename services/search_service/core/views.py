@@ -6,10 +6,6 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# CSRF Exemption
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
 # Initialzes Logger
 logger = logging.getLogger('django')
 
@@ -17,7 +13,7 @@ logger = logging.getLogger('django')
 INTEGRATION_SERVICE_URL = settings.INTEGRATION_SERVICE_URL
 USER_SERVICE_URL = settings.USER_SERVICE_URL
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class SearchRecipesView(APIView):
     def get(self, request):
         try:
@@ -63,7 +59,7 @@ class SearchRecipesView(APIView):
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class SearchIngredientsView(APIView):
     def get(self, request):
         try:

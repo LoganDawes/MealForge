@@ -12,17 +12,12 @@ from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.exceptions import ParseError
 
-# CSRF Exemption
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
 # Initialzes Logger
 logger = logging.getLogger('django')
 
 # User Service's URL is in settings.py
 USER_SERVICE_URL = settings.USER_SERVICE_URL
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -83,7 +78,7 @@ class RegisterView(APIView):
             logger.error(f"Error when calling user service: {str(e)}")
             return Response({"message": str(e)}, status=500)
             
-@method_decorator(csrf_exempt, name='dispatch')
+
 class UnregisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -148,7 +143,7 @@ class UnregisterView(APIView):
             logger.error(f"Error when calling user service: {str(e)}")
             return Response({"message": str(e)}, status=500)
     
-@method_decorator(csrf_exempt, name='dispatch')
+
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -187,7 +182,7 @@ class LoginView(APIView):
             logger.error("Invalid JSON data received for login")
             return Response({"message": "Invalid JSON data"}, status=400)
     
-@method_decorator(csrf_exempt, name='dispatch')
+
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -220,7 +215,7 @@ class LogoutView(APIView):
             logger.error("Invalid JSON data received for logout")
             return Response({"message": "Invalid JSON data"}, status=400)
         
-@method_decorator(csrf_exempt, name='dispatch')
+
 class RefreshTokenView(APIView):
     permission_classes = [permissions.AllowAny]
 

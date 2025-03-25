@@ -8,10 +8,6 @@ from rest_framework import status
 # Models & Serializers
 from .serializers import LogSerializer
 
-# CSRF Exemption
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-
 # Initialize Logger
 logger = logging.getLogger('django')
 
