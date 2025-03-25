@@ -1,11 +1,11 @@
 import requests
-import json
 import logging
 from django.conf import settings
 
 # REST Framework
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ParseError
 
 # CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
@@ -41,7 +41,7 @@ class RegisterUserView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received")
             return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
@@ -69,7 +69,7 @@ class UnregisterUserView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received")
             return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
@@ -94,7 +94,7 @@ class LoginUserView(APIView):
             return Response(response.json(), status=response.status_code)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for login")
             return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
@@ -135,7 +135,7 @@ class LogoutUserView(APIView):
             return Response(response.json(), status=response.status_code)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for logout")
             return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
@@ -163,7 +163,7 @@ class RefreshTokenView(APIView):
             return Response(response.json(), status=response.status_code)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for refresh token")
             return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
@@ -242,6 +242,9 @@ class UpdatePreferencesView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
+        except ParseError:
+            logger.error("Invalid JSON data received for update preferences")
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
@@ -438,6 +441,9 @@ class UserRecipesView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
+        except ParseError:
+            logger.error("Invalid JSON data received for add user recipes")
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
@@ -478,6 +484,9 @@ class UserRecipesView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
+        except ParseError:
+            logger.error("Invalid JSON data received for remove user recipes")
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
@@ -554,6 +563,9 @@ class UserIngredientsView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
+        except ParseError:
+            logger.error("Invalid JSON data received for add user ingredients")
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)
@@ -594,6 +606,9 @@ class UserIngredientsView(APIView):
             return Response(response.json(), status=response.status_code)
         
         # Exception Handling
+        except ParseError:
+            logger.error("Invalid JSON data received for remove user ingredients")
+            return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)

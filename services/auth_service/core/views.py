@@ -1,5 +1,4 @@
 import requests
-import json
 import logging
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -11,6 +10,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions, status
+from rest_framework.exceptions import ParseError
 
 # CSRF Exemption
 from django.views.decorators.csrf import csrf_exempt
@@ -29,7 +29,7 @@ class RegisterView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER : Test received Data
             logger.info(f"Received Register Data at auth_service: {data}")
@@ -76,9 +76,12 @@ class RegisterView(APIView):
                 return Response(response.json(), status=response.status_code)
 
         # Exception Handling
-        except json.JSONDecodeError:
-            logger.error(f"Invalid JSON data received: {request.body}")
+        except ParseError:
+            logger.error(f"Invalid JSON data received for registration")
             return Response({"message": "Invalid JSON data"}, status=400)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error when calling user service: {str(e)}")
+            return Response({"message": str(e)}, status=500)
             
 @method_decorator(csrf_exempt, name='dispatch')
 class UnregisterView(APIView):
@@ -87,7 +90,7 @@ class UnregisterView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER : Test received Data
             logger.info(f"Received Unregister Data at auth_service: {data}")
@@ -138,8 +141,8 @@ class UnregisterView(APIView):
                 return Response(response.json(), status=response.status_code)
 
         # Exception Handling
-        except json.JSONDecodeError:
-            logger.error(f"Invalid JSON data received: {request.body}")
+        except ParseError:
+            logger.error(f"Invalid JSON data received for unregistration")
             return Response({"message": "Invalid JSON data"}, status=400)
         except requests.exceptions.RequestException as e:
             logger.error(f"Error when calling user service: {str(e)}")
@@ -152,7 +155,7 @@ class LoginView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Received Login Data at auth_service: {data}")
@@ -180,7 +183,7 @@ class LoginView(APIView):
             }, status=200)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for login")
             return Response({"message": "Invalid JSON data"}, status=400)
     
@@ -191,7 +194,7 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Received Logout Data at auth_service: {data}")
@@ -213,8 +216,8 @@ class LogoutView(APIView):
                 return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Exception Handling
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON data received for login")
+        except ParseError:
+            logger.error("Invalid JSON data received for logout")
             return Response({"message": "Invalid JSON data"}, status=400)
         
 @method_decorator(csrf_exempt, name='dispatch')
@@ -224,7 +227,7 @@ class RefreshTokenView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Received Refresh Token Data: {data}")
@@ -243,6 +246,6 @@ class RefreshTokenView(APIView):
             }, status=status.HTTP_200_OK)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for refresh token")
             return Response({"message": "Invalid JSON data"}, status=400)

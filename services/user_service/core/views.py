@@ -1,5 +1,4 @@
 import requests
-import json
 import logging
 from django.conf import settings
 
@@ -7,6 +6,7 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions, status
+from rest_framework.exceptions import ParseError
 
 # Models & Serializers
 from django.contrib.auth.models import User
@@ -31,7 +31,7 @@ class UserView(APIView):
     def post(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER : Test received Data
             logger.info(f"Received Data for user creation: {data}")
@@ -50,7 +50,7 @@ class UserView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for creation")
             return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -61,7 +61,7 @@ class UserView(APIView):
     def delete(self, request):
         try:
             # Read JSON
-            data = json.loads(request.body)
+            data = request.data
 
             # LOGGER: Test received data
             logger.info(f"Received Data for user deletion: {data}")
@@ -78,7 +78,7 @@ class UserView(APIView):
             return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for deletion")
             return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -206,7 +206,7 @@ class UserRecipesView(APIView):
                 return Response({"message": "No recipe provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Exception Handling
-        except json.JSONDecodeError:
+        except ParseError:
             logger.error("Invalid JSON data received for deletion")
             return Response({"message": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

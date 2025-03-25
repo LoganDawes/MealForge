@@ -1,7 +1,4 @@
-import requests
-import json
 import logging
-from django.conf import settings
 
 # REST Framework
 from rest_framework.response import Response
@@ -9,7 +6,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 # Models & Serializers
-from .models import Log
 from .serializers import LogSerializer
 
 # CSRF Exemption
