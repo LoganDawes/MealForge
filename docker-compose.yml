@@ -3,7 +3,7 @@ services:
     build: ./frontend
     container_name: frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - api_gateway
     networks:
