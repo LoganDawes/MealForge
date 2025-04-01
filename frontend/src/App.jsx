@@ -1,43 +1,27 @@
-import React, { useState } from 'react';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-function App() {
-  const [responseMessage, setResponseMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+// Import pages
+import Home from './pages/Home';
+import Ingredients from './pages/Ingredients';
+import Recipes from './pages/Recipes';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
 
-  const testRegisterUser = async () => {
-    try {
-      const response = await fetch('/api/register/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: 'testuser',
-          password: 'testpassword',
-          email: 'testuser@example.com',
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setResponseMessage(`Success: ${data.message}`);
-    } catch (error) {
-      setErrorMessage(`Failed: ${error.message}`);
-    }
-  };
-
+const App = () => {
   return (
-    <div className="App">
-      <h1>Welcome to MealForge</h1>
-      <button onClick={testRegisterUser}>Test Register User</button>
-      {responseMessage && <p style={{ color: 'green' }}>{responseMessage}</p>}
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-    </div>
+    <Router>
+      {/* Define routes to each page */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/ingredients" element={<Ingredients />} />
+        <Route path="/recipes" element={<Recipes />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
