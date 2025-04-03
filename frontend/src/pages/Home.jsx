@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Navigationbar from '../components/Navbar';
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
@@ -36,10 +37,11 @@ function Home() {
     // HTML
     return (
     <div className="Home">
-      <h1 className="mb-3 text-primary">Welcome to MealForge</h1>
-      <button onClick={testRegisterUser}>Test Register User</button>
-      {responseMessage && <p style={{ color: 'green' }}>{responseMessage}</p>}
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        <Navigationbar />
+        <h1 className="mb-3 text-primary">Welcome to MealForge</h1>
+        <button onClick={testRegisterUser}>Test Register User</button>
+        {responseMessage && <p style={{ color: 'green' }}>{responseMessage}</p>}
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
     );
 }
