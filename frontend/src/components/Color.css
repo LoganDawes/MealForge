@@ -1,0 +1,20 @@
+.btn-primary {
+    background-color: #461bb2;
+    border-color: #461bb2;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #7956d1;
+    border-color: #7956d1;
+    color: white;
+  }
+  
+  .text-primary {
+    color: #461bb2;
+  }
+  
+  .navbar .dropdown-menu .nav-link.active {
+    background-color: #461bb2;
+    color: white;
+  }

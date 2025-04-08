@@ -1,6 +1,7 @@
 import Navigationbar from '../components/Navbar';
 import SubNavbar from "../components/SubNavbar";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./Color.css"
 
 function Recipes() {
     // HTML

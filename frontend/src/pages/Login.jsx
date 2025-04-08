@@ -1,5 +1,6 @@
 import Navigationbar from '../components/Navbar';
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./Color.css"
 
 function Login() {
     // HTML

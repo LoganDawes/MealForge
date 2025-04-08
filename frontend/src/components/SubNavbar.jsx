@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Navbar, Button, Form, InputGroup, Nav, Container } from "react-bootstrap";
+import "./Color.css"
 
 const SubNavbar = ({ pageTitle }) => {
     // States

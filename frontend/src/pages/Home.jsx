@@ -1,47 +1,22 @@
-import React, { useState } from 'react';
 import Navigationbar from '../components/Navbar';
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./Home.css"
+import "./Color.css"
+import { Link } from "react-router-dom";
 
 function Home() {
-    // States
-    const [responseMessage, setResponseMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-
-    // Functions
-    const testRegisterUser = async () => {
-        try {
-        const response = await fetch('/api/register/', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-            username: 'testuser',
-            password: 'testpassword',
-            email: 'testuser@example.com',
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setResponseMessage(`Success: ${data.message}`);
-        }
-        catch (error) {
-        setErrorMessage(`Failed: ${error.message}`);
-        }
-    };
-
     // HTML
     return (
     <div className="Home">
         <Navigationbar />
-        <h1 className="mb-3 text-primary">Welcome to MealForge</h1>
-        <button onClick={testRegisterUser}>Test Register User</button>
-        {responseMessage && <p style={{ color: 'green' }}>{responseMessage}</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        <div className="content">
+                <h1>Welcome to MealForge</h1>
+                <p>Maintaining and balancing a nutritional diet is a huge challenge for health-conscious people who want to improve their well-being and find meals that align with their personal diets. Many meal-planning apps can fail to consider the specific nutritional requirements that go into each recipe and can lead to extended periods of research for something that should be simple.
+                MealForge aims to address this, and offer recipes based on user-defined ingredients and dietary restrictions.</p>
+                <Link to="/ingredients">
+                    <button className="btn btn-primary">Get Started</button>
+                </Link>
+            </div>
     </div>
     );
 }
