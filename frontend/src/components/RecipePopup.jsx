@@ -14,15 +14,12 @@ const indented = ["Saturated Fat", "Trans Fat"];
 const RecipePopup = ({ recipe, onClose }) => {
   const {
     image,
-    name,
+    title,
+    sourceUrl,
+    nutrition = { nutrients: [], ingredients: [] },
     diets = [],
-    intolerances = [],
-    nutrition = {},
-    ingredients = [],
-    steps = [],
-    recipeLink = "",
-    servingSize = "",
-    units = []
+    analyzedInstructions = [],
+    servings = "",
   } = recipe;
 
   // Close on outside click
@@ -39,14 +36,14 @@ const RecipePopup = ({ recipe, onClose }) => {
       <Card className="popup-card d-flex flex-row" style={{ width: "90%", maxWidth: "1200px", height: "80vh" }}>
         {/* Left Column: Image + Info */}
         <div className="popup-left p-3" style={{ flex: 1 }}>
-          <img src={image} alt={name} className="img-fluid rounded mb-3" />
+          <img src={image} alt={title} className="img-fluid rounded mb-3" />
           <div>
-            <a href={recipeLink} target="_blank" rel="noopener noreferrer" style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {recipeLink}
+            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {sourceUrl}
             </a>
           </div>
           <div><strong>Diets:</strong> {diets.join(", ")}</div>
-          <div><strong>Intolerances:</strong> {intolerances.join(", ")}</div>
+          {/*<div><strong>Intolerances:</strong> {intolerances.join(", ")}</div>*/}
         </div>
 
         {/* Middle and Right Columns Container */}
@@ -54,16 +51,14 @@ const RecipePopup = ({ recipe, onClose }) => {
           {/* Middle Column: Nutrition Table */}
           <div className="popup-nutrition" style={{ flex: 1, paddingRight: "10px", display: "flex", flexDirection: "column", marginBottom: "0", height: "100%" }}>
             <div className="d-flex justify-content-between align-items-start">
-                <h3>{name}</h3>
+                <h3>{title}</h3>
             </div>
 
-            <Form.Group className="d-flex gap-2 mt-3">
-                <Form.Label className="pt-2">Serving Size:</Form.Label>
-                <Form.Control type="text" defaultValue={servingSize} style={{ width: "80px" }} />
-                <Form.Select style={{ width: "120px" }}>
-                {units.map((u, idx) => <option key={idx}>{u}</option>)}
-                </Form.Select>
-            </Form.Group>
+                      {/* Serving Size */}
+                      <div className="d-flex gap-2 mt-3">
+              <Form.Label className="pt-2">Serving Size:</Form.Label>
+              <span>{servings}</span>
+            </div>
 
             {/* Stretch the table container to fill available space */}
             <div className="table-scroll" style={{ minHeight: "600px", overflowY: "auto" }}>
@@ -78,16 +73,15 @@ const RecipePopup = ({ recipe, onClose }) => {
                 <tbody>
                     {nutrientList.map((nutrient, idx) => (
                     <tr key={idx}>
-                        <td className={indented.includes(nutrient) ? "ps-4" : ""}>{nutrient}</td>
-                        <td>{nutrition[nutrient]?.amount ?? "-----"}</td>
-                        <td>{nutrition[nutrient]?.daily ?? "-----"}</td>
-                    </tr>
+                    <td className={indented.includes(nutrient) ? "ps-4" : ""}>{nutrient}</td>
+                      <td>{nutrition.nutrients.find(n => n.name === nutrient)?.amount ?? "-----"}</td>
+                      <td>{nutrition.nutrients.find(n => n.name === nutrient)?.percentOfDailyNeeds ?? "-----"}</td>
+                  </tr>
                     ))}
                 </tbody>
                 </Table>
             </div>
             </div>
-
 
           {/* Right Column: Ingredients (top half) and Steps (bottom half) */}
           <div className="popup-details" style={{ flex: 1, paddingLeft: "20px", display: "flex", flexDirection: "column" }}>
@@ -99,11 +93,11 @@ const RecipePopup = ({ recipe, onClose }) => {
 
             {/* Ingredients Section */}
             <div style={{ flex: 1, overflowY: "auto" }}>
-              <strong>Ingredients – {ingredients.length}</strong>
+              <strong>Ingredients – {nutrition.ingredients.length}</strong>
               <ListGroup className="mb-3">
-                {ingredients.map((ing, idx) => (
+                {nutrition.ingredients.map((ing, idx) => (
                   <ListGroup.Item key={idx} className="d-flex justify-content-between">
-                    <span>{ing.saved ? "✅" : "⬜️"} {ing.name}</span>
+                    <span>{ing.saved ? "✅" : "⬜️"} {ing.amount}{" "}{ing.unit}{" "}{ing.name}</span>
                   </ListGroup.Item>
                 ))}
               </ListGroup>
@@ -113,8 +107,8 @@ const RecipePopup = ({ recipe, onClose }) => {
             <div style={{ flex: 1, overflowY: "auto", marginTop: "20px" }}>
               <strong>Steps:</strong>
               <ListGroup as="ol" numbered>
-                {steps.map((step, idx) => (
-                  <ListGroup.Item key={idx}>{step}</ListGroup.Item>
+                {analyzedInstructions[0]?.steps.map((step, idx) => (
+                  <ListGroup.Item key={idx}>{step.step}</ListGroup.Item>
                 ))}
               </ListGroup>
             </div>

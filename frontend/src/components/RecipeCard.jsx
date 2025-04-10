@@ -4,22 +4,28 @@ import "./RecipeCard.css";
 
 const RecipeCard = ({
   image,
-  name,
-  recipeLink,
-  nutrition = {},
-  ingredients = [],
+  title,
+  sourceUrl,
+  nutrition = { nutrients: [], ingredients: [] },
   diets = [],
   onClick
 }) => {
+  const nutritionValues = {
+    calories: nutrition.nutrients.find(nutrient => nutrient.name === "Calories"),
+    fat: nutrition.nutrients.find(nutrient => nutrient.name === "Fat"),
+    carbs: nutrition.nutrients.find(nutrient => nutrient.name === "Carbohydrates"),
+    protein: nutrition.nutrients.find(nutrient => nutrient.name === "Protein")
+  };
+
   return (
     <Card className="mb-3 d-flex flex-row" style={{ height: "350px" }} onClick={onClick}>
       {/* Left side: Image, Link, Diets */}
       <div style={{ width: "30%", minWidth: "200px" }} className="p-2 d-flex flex-column justify-content-between">
-        <img src={image} alt={name} className="img-fluid rounded" style={{ objectFit: "cover", height: "150px" }} />
-        
+        <img src={image} alt={title} className="img-fluid rounded" style={{ objectFit: "cover", height: "150px" }} />
+
         {/* Recipe Link */}
-        <a href={recipeLink} className="text-truncate d-block mt-2" title={recipeLink} target="_blank" rel="noopener noreferrer">
-          {recipeLink}
+        <a href={sourceUrl} className="text-truncate d-block mt-2" title={sourceUrl} target="_blank" rel="noopener noreferrer">
+          {sourceUrl}
         </a>
 
         {/* Diet Alignments */}
@@ -33,55 +39,55 @@ const RecipeCard = ({
         </div>
       </div>
 
-      {/* Right side: Name, Nutrition, Ingredients */}
+      {/* Right side: Title, Nutrition, Ingredients */}
       <Card.Body className="d-flex flex-column" style={{ overflow: "hidden" }}>
         <div>
-          <Card.Title>{name}</Card.Title>
+          <Card.Title>{title}</Card.Title>
 
           <Table size="sm" className="mb-2">
-                    <thead>
-                      <tr>
-                        <th>Macro</th>
-                        <th>Amount</th>
-                        <th>% Daily</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Calories</td>
-                        <td>{nutrition?.Calories?.amount ?? "-----"}</td>
-                        <td>{nutrition?.Calories?.daily ?? "-----"}</td>
-                      </tr>
-                      <tr>
-                        <td>Fat</td>
-                        <td>{nutrition?.Fat?.amount ?? "-----"}g</td>
-                        <td>{nutrition?.Fat?.daily ?? "-----"}</td>
-                      </tr>
-                      <tr>
-                        <td>Carbs</td>
-                        <td>{nutrition?.Carbohydrates?.amount ?? "-----"}g</td>
-                        <td>{nutrition?.Carbohydrates?.daily ?? "-----"}</td>
-                      </tr>
-                      <tr>
-                        <td>Protein</td>
-                        <td>{nutrition?.Protein?.amount ?? "-----"}g</td>
-                        <td>{nutrition?.Protein?.daily ?? "-----"}</td>
-                      </tr>
-                    </tbody>
-                  </Table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>% Daily</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Calories</td>
+                <td>{nutritionValues.calories?.amount ?? "-----"}</td>
+                <td>{nutritionValues.calories?.percentOfDailyNeeds ?? "-----"}%</td>
+              </tr>
+              <tr>
+                <td>Fat</td>
+                <td>{nutritionValues.fat?.amount ?? "-----"}g</td>
+                <td>{nutritionValues.fat?.percentOfDailyNeeds ?? "-----"}%</td>
+              </tr>
+              <tr>
+                <td>Carbs</td>
+                <td>{nutritionValues.carbs?.amount ?? "-----"}g</td>
+                <td>{nutritionValues.carbs?.percentOfDailyNeeds ?? "-----"}%</td>
+              </tr>
+              <tr>
+                <td>Protein</td>
+                <td>{nutritionValues.protein?.amount ?? "-----"}g</td>
+                <td>{nutritionValues.protein?.percentOfDailyNeeds ?? "-----"}%</td>
+              </tr>
+            </tbody>
+          </Table>
         </div>
 
         {/* Ingredients */}
         <div style={{ overflow: "hidden", flexShrink: 0 }}>
-        <strong>Ingredients – {ingredients.length}</strong>
-        <ul className="mb-0 ps-3">
-            {ingredients.slice(0, 3).map((ing, idx) => (
-            <li key={idx}>
+          <strong>Ingredients – {nutrition.ingredients.length}</strong>
+          <ul className="mb-0 ps-3">
+            {nutrition.ingredients.slice(0, 3).map((ing, idx) => (
+              <li key={idx}>
                 {ing.saved ? "✅" : "⬜️"} {ing.name}
-            </li>
+              </li>
             ))}
-            {ingredients.length > 3 && <li>...</li>}
-        </ul>
+            {nutrition.ingredients.length > 3 && <li>...</li>}
+          </ul>
         </div>
       </Card.Body>
     </Card>

@@ -16,7 +16,7 @@ const IngredientCard = ({ image, name, nutrition = {}, diets = [], onClick }) =>
         <Table size="sm" className="mb-2">
           <thead>
             <tr>
-              <th>Macro</th>
+              <th>Name</th>
               <th>Amount</th>
               <th>% Daily</th>
             </tr>

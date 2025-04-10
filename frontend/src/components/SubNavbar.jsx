@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import { Navbar, Button, Form, InputGroup, Nav, Container } from "react-bootstrap";
 import "./Color.css"
 
-const SubNavbar = ({ pageTitle }) => {
+const SubNavbar = ({ pageTitle, onSearch }) => {
     // States
     const [activeTab, setActiveTab] = useState("search");
     const [searchText, setSearchText] = useState("");
+
+    const handleSearch = () => {
+        onSearch(searchText);
+      };
 
     // HTML
     return (
@@ -43,7 +47,7 @@ const SubNavbar = ({ pageTitle }) => {
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                 />
-                <Button variant="primary">Search</Button>
+                <Button variant="primary" onClick={handleSearch}>Search</Button>
                 <Button variant="outline-secondary" onClick={() => setSearchText("")}>Clear</Button>
                 </InputGroup>
             </div>
