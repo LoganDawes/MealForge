@@ -2,11 +2,26 @@ import React from "react";
 import { Card, Table } from "react-bootstrap";
 import "./IngredientCard.css";
 
-const IngredientCard = ({ image, name, nutrition = {}, diets = [], onClick }) => {
+const IngredientCard = ({ image, name, nutrition = {nutrients: []}, onClick }) => {
+  const imageUrl = image ? `https://img.spoonacular.com/ingredients_100x100/${image}` : '';
+  
+  const nutritionValues = {
+    calories: nutrition.nutrients.find(nutrient => nutrient.name === "Calories"),
+    fat: nutrition.nutrients.find(nutrient => nutrient.name === "Fat"),
+    carbs: nutrition.nutrients.find(nutrient => nutrient.name === "Carbohydrates"),
+    protein: nutrition.nutrients.find(nutrient => nutrient.name === "Protein")
+  };
+
   return (
     <Card className="mb-3" style={{ width: '18rem', cursor: 'pointer' }} onClick={onClick}>
       {/* Image */}
-      <Card.Img variant="top" src={image} alt={name} />
+      <Card.Img 
+        variant="top" 
+        src={imageUrl} 
+        alt={name} 
+        className="img-fluid rounded" 
+        style={{ objectFit: "contain", height: "150px", width: "100%" }} 
+      />
 
       <Card.Body>
         {/* Name */}
@@ -14,50 +29,36 @@ const IngredientCard = ({ image, name, nutrition = {}, diets = [], onClick }) =>
 
         {/* Nutrition Table */}
         <Table size="sm" className="mb-2">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Amount</th>
-              <th>% Daily</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Calories</td>
-              <td>{nutrition?.Calories?.amount ?? "-----"}</td>
-              <td>{nutrition?.Calories?.daily ?? "-----"}</td>
-            </tr>
-            <tr>
-              <td>Fat</td>
-              <td>{nutrition?.Fat?.amount ?? "-----"}g</td>
-              <td>{nutrition?.Fat?.daily ?? "-----"}</td>
-            </tr>
-            <tr>
-              <td>Carbs</td>
-              <td>{nutrition?.Carbohydrates?.amount ?? "-----"}g</td>
-              <td>{nutrition?.Carbohydrates?.daily ?? "-----"}</td>
-            </tr>
-            <tr>
-              <td>Protein</td>
-              <td>{nutrition?.Protein?.amount ?? "-----"}g</td>
-              <td>{nutrition?.Protein?.daily ?? "-----"}</td>
-            </tr>
-          </tbody>
-        </Table>
-
-        <hr />
-
-        {/* Diet Alignments */}
-        <div>
-          <strong>Diets:</strong>
-          <ul className="mb-0 ps-3">
-            {diets.map((diet, idx) => (
-              <li key={idx}>
-                <span className="text-success">✅ </span> {diet}
-              </li>
-            ))}
-          </ul>
-        </div>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>% Daily</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Calories</td>
+                        <td>{nutritionValues.calories?.amount ?? "-----"}</td>
+                        <td>{nutritionValues.calories?.percentOfDailyNeeds ?? "-----"}%</td>
+                      </tr>
+                      <tr>
+                        <td>Fat</td>
+                        <td>{nutritionValues.fat?.amount ?? "-----"}g</td>
+                        <td>{nutritionValues.fat?.percentOfDailyNeeds ?? "-----"}%</td>
+                      </tr>
+                      <tr>
+                        <td>Carbs</td>
+                        <td>{nutritionValues.carbs?.amount ?? "-----"}g</td>
+                        <td>{nutritionValues.carbs?.percentOfDailyNeeds ?? "-----"}%</td>
+                      </tr>
+                      <tr>
+                        <td>Protein</td>
+                        <td>{nutritionValues.protein?.amount ?? "-----"}g</td>
+                        <td>{nutritionValues.protein?.percentOfDailyNeeds ?? "-----"}%</td>
+                      </tr>
+                    </tbody>
+                  </Table>
       </Card.Body>
     </Card>
   );

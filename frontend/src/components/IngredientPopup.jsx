@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form } from "react-bootstrap";
+import axios from "axios";
 import "./IngredientPopup.css";
 
 const nutrientList = [
@@ -13,7 +14,11 @@ const nutrientList = [
 const indented = ["Saturated Fat", "Trans Fat"];
 
 const IngredientPopup = ({ ingredient, onClose }) => {
-  const { image, name, diets = [], intolerances = [], nutrition = {}, servingSize = "", units = [] } = ingredient;
+  const [amount, setAmount] = useState(ingredient.amount || 1);
+  const [unit, setUnit] = useState(ingredient.unit || "unit");
+  const [nutrition, setNutrition] = useState(ingredient.nutrition || { nutrients: [] });
+
+  const imageUrl = ingredient.image ? `https://img.spoonacular.com/ingredients_100x100/${ingredient.image}` : '';
 
   // Close on outside click
   useEffect(() => {
@@ -24,20 +29,34 @@ const IngredientPopup = ({ ingredient, onClose }) => {
     return () => window.removeEventListener("click", handleClickOutside);
   }, [onClose]);
 
+  // Fetch updated nutrition when amount or unit changes
+  useEffect(() => {
+    const fetchNutrition = async () => {
+      try {
+        const res = await axios.get(`/api/ingredients/${ingredient.id}`, {
+          params: { amount, unit }
+        });
+        setNutrition(res.data.nutrition);
+      } catch (err) {
+        console.error("Failed to fetch updated nutrition:", err);
+      }
+    };
+
+    fetchNutrition();
+  }, [amount, unit, ingredient.id]);
+
   return (
     <div className="popup-overlay">
       <Card className="popup-card d-flex flex-row">
         {/* Left: Image + Info */}
-        <div className="popup-left p-3">
-          <img src={image} alt={name} className="img-fluid rounded mb-3" />
-          <div><strong>Diets:</strong> {diets.join(", ")}</div>
-          <div><strong>Intolerances:</strong> {intolerances.join(", ")}</div>
+        <div className="popup-left">
+          <img src={imageUrl} alt={ingredient.name}/>
         </div>
 
         {/* Right: Details */}
         <Card.Body className="popup-right">
           <div className="d-flex justify-content-between align-items-start">
-            <h3>{name}</h3>
+            <h3>{ingredient.name}</h3>
             <div className="d-flex align-items-center gap-2">
               <Button variant="success">+</Button>
               <Button variant="outline-danger" onClick={onClose}>X</Button>
@@ -45,10 +64,21 @@ const IngredientPopup = ({ ingredient, onClose }) => {
           </div>
 
           <Form.Group className="d-flex gap-2 mt-3">
-            <Form.Label className="pt-2">Serving Size:</Form.Label>
-            <Form.Control type="text" defaultValue={servingSize} style={{ width: "80px" }} />
-            <Form.Select style={{ width: "120px" }}>
-              {units.map((u, idx) => <option key={idx}>{u}</option>)}
+            <Form.Label className="pt-2">Unit:</Form.Label>
+            <Form.Control
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              style={{ width: "80px" }}
+            />
+            <Form.Select
+              style={{ width: "120px" }}
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+            >
+              {ingredient.possibleUnits.map((u, idx) => (
+                <option key={idx} value={u}>{u}</option>
+              ))}
             </Form.Select>
           </Form.Group>
 
@@ -62,13 +92,16 @@ const IngredientPopup = ({ ingredient, onClose }) => {
                 </tr>
               </thead>
               <tbody>
-                {nutrientList.map((nutrient, idx) => (
-                  <tr key={idx}>
-                    <td className={indented.includes(nutrient) ? "ps-4" : ""}>{nutrient}</td>
-                    <td>{nutrition[nutrient]?.amount ?? "-----"}</td>
-                    <td>{nutrition[nutrient]?.daily ?? "-----"}</td>
-                  </tr>
-                ))}
+                {nutrientList.map((nutrient, idx) => {
+                  const data = nutrition.nutrients.find(n => n.name === nutrient);
+                  return (
+                    <tr key={idx}>
+                      <td className={indented.includes(nutrient) ? "ps-4" : ""}>{nutrient}</td>
+                      <td>{data?.amount ?? "-----"}</td>
+                      <td>{data?.percentOfDailyNeeds ?? "-----"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </div>
