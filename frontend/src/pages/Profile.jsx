@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navigationbar from "../components/Navbar";
 import { Form, Card, Container, Button, Dropdown } from "react-bootstrap";
 import "./Color.css";
+import axios from "axios";
 
 const dietOptions = [
   "Gluten Free", "Ketogenic", "Vegetarian", "Lacto-vegetarian", "Ovo-vegetarian",
@@ -59,20 +60,70 @@ const Profile = () => {
   const [selectedIntolerances, setSelectedIntolerances] = useState([]);
   const [calorieLimit, setCalorieLimit] = useState("");
 
+  // Fetch preferences when component mounts
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await axios.get("/api/preferences/", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        setSelectedDiets(response.data.diets);
+        setSelectedIntolerances(response.data.intolerances);
+        setCalorieLimit(response.data.calorie_limit);
+      } catch (error) {
+        console.error("Error fetching preferences:", error);
+      }
+    };
+
+    fetchPreferences();
+  }, []);
+
+  // Update preferences on the backend
+  const updatePreferences = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      const response = await axios.put(
+        "/api/preferences/update/",
+        {
+          diets: selectedDiets,
+          intolerances: selectedIntolerances,
+          calorie_limit: calorieLimit,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Preferences updated:", response.data);
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+    }
+  };
+
+  // Handle diet preferences
   const handleAddDiet = (diet) => setSelectedDiets((prev) => [...prev, diet]);
-  const handleRemoveDiet = (diet) =>
-    setSelectedDiets((prev) => prev.filter((d) => d !== diet));
+  const handleRemoveDiet = (diet) => setSelectedDiets((prev) => prev.filter((d) => d !== diet));
 
-  const handleAddIntolerance = (item) =>
-    setSelectedIntolerances((prev) => [...prev, item]);
-  const handleRemoveIntolerance = (item) =>
-    setSelectedIntolerances((prev) => prev.filter((i) => i !== item));
+  // Handle intolerance preferences
+  const handleAddIntolerance = (item) => setSelectedIntolerances((prev) => [...prev, item]);
+  const handleRemoveIntolerance = (item) => setSelectedIntolerances((prev) => prev.filter((i) => i !== item));
 
+  // Handle calorie limit
   const handleCalorieChange = (e) => {
     const value = e.target.value;
     if (/^\d{0,4}$/.test(value)) {
       setCalorieLimit(value);
     }
+  };
+
+  // Handle save preferences
+  const handleSavePreferences = () => {
+    updatePreferences();
+    alert("Preferences saved!");
   };
 
   return (
@@ -110,6 +161,10 @@ const Profile = () => {
               placeholder="Enter calorie limit"
             />
           </Form.Group>
+
+          <Button variant="primary" className="w-100 mt-3" onClick={handleSavePreferences}>
+            Save Preferences
+          </Button>
         </Card>
       </Container>
     </>

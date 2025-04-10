@@ -22,8 +22,8 @@ const Login = () => {
 
       localStorage.setItem("username", username);
 
-      localStorage.setItem("accessToken", res.data.access);
-      localStorage.setItem("refreshToken", res.data.refresh);
+      localStorage.setItem("accessToken", res.data.access_token);
+      localStorage.setItem("refreshToken", res.data.refresh_token);
 
       navigate("/");
 

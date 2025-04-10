@@ -48,8 +48,8 @@ const Register = () => {
 
       localStorage.setItem("username", formData.username);
 
-      localStorage.setItem("accessToken", loginRes.data.access);
-      localStorage.setItem("refreshToken", loginRes.data.refresh);
+      localStorage.setItem("accessToken", loginRes.data.access_token);
+      localStorage.setItem("refreshToken", loginRes.data.refresh_token);
 
       navigate("/");
     } catch (error) {
