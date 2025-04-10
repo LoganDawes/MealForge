@@ -1,16 +1,37 @@
 import React, { useState } from "react";
 import Navigationbar from "../components/Navbar";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Form, Button, Card, Container } from "react-bootstrap";
 import "./Color.css";
+import axios from "axios";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic
+    try {
+      const res = await axios.post("/api/login/", {
+        username: username,
+        password: password
+      });
+
+      localStorage.setItem("username", username);
+
+      localStorage.setItem("accessToken", res.data.access);
+      localStorage.setItem("refreshToken", res.data.refresh);
+
+      navigate("/");
+
+    } catch (error) {
+      console.error("Login Error:", error);
+      const msg = error.response?.data?.detail || "Login failed";
+      alert(msg);
+    }
   };
 
   return (

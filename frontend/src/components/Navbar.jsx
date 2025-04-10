@@ -1,10 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import "./Color.css"
 
 const Navigationbar = () => {
+  const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("accessToken");
+  const username = localStorage.getItem("username");
 
   return (
     <Navbar bg="light" expand="lg" className="px-3 fixed-top">
@@ -17,6 +20,7 @@ const Navigationbar = () => {
         </Nav>
 
         <Nav>
+          {isLoggedIn && <Nav.Link as={Link} to="/profile">{username}</Nav.Link>}
           <NavDropdown title={<span className="bi bi-person-circle"></span>} id="profile-dropdown" align="end">
             {isLoggedIn ? (
               <>
@@ -25,7 +29,7 @@ const Navigationbar = () => {
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={() => {
                   localStorage.removeItem("accessToken");
-                  window.location.reload(); // or use navigation to redirect
+                  navigate("/");
                 }}>Logout</NavDropdown.Item>
               </>
             ) : (

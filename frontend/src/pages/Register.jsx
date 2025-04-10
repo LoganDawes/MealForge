@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import Navigationbar from "../components/Navbar";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Form, Button, Card, Container } from "react-bootstrap";
 import "./Color.css";
+import axios from "axios";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +14,8 @@ const Register = () => {
     confirmPassword: ""
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
@@ -19,9 +23,53 @@ const Register = () => {
     }));
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // TODO: Implement registration logic
+    
+    // Detect if the password and confirm password fields match
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      // Register user
+      await axios.post("/api/register/", {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Automatically log in
+      const loginRes = await axios.post("/api/login/", {
+        username: formData.username,
+        password: formData.password
+      });
+
+      localStorage.setItem("username", formData.username);
+
+      localStorage.setItem("accessToken", loginRes.data.access);
+      localStorage.setItem("refreshToken", loginRes.data.refresh);
+
+      navigate("/");
+    } catch (error) {
+      console.error("Registration/Login Error:", error);
+    
+      if (error.response) {
+        // Backend returned a response
+        console.error("Response data:", error.response.data);
+        console.error("Status code:", error.response.status);
+        alert(error.response.data.detail || "Registration failed");
+      } else if (error.request) {
+        // Request was made but no response
+        console.error("No response received:", error.request);
+        alert("No response from server. Check API gateway address.");
+      } else {
+        // Something else
+        console.error("Error setting up request:", error.message);
+        alert("An unexpected error occurred");
+      }
+    }
   };
 
   return (
