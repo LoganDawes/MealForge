@@ -6,7 +6,7 @@ import RecipePopup from "../components/RecipePopup";
 import { Container, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Color.css";
-import axios from 'axios';
+import axios_api from "../utils/axiosInstance";
 
 function Recipes() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -18,7 +18,7 @@ function Recipes() {
   const handleSearch = async (searchTerm) => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/search/recipes`, {
+      const response = await axios_api.get(`/search/recipes`, {
         params: {
           query: searchTerm,
           addRecipeNutrition: true,
@@ -42,11 +42,7 @@ function Recipes() {
 
     setLoading(true);
     try {
-      const response = await axios.get(`/api/user/recipes`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios_api.get(`/user/recipes`);
       setRecipes(response.data.recipes); // Assuming the API returns a list of saved recipes
     } catch (err) {
       console.error("Failed to load saved recipes:", err);

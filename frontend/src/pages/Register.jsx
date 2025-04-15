@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Card, Container } from "react-bootstrap";
 import "./Color.css";
-import axios from "axios";
+import axios_api from "../utils/axiosInstance";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -34,16 +34,20 @@ const Register = () => {
 
     try {
       // Register user
-      await axios.post("/api/register/", {
+      await axios_api.post("/register/", {
         username: formData.username,
         email: formData.email,
         password: formData.password
+      }, {
+        noAuth: true,
       });
 
       // Automatically log in
-      const loginRes = await axios.post("/api/login/", {
+      const loginRes = await axios_api.post("/login/", {
         username: formData.username,
         password: formData.password
+      }, {
+        noAuth: true,
       });
 
       localStorage.setItem("username", formData.username);

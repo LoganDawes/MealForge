@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form, ListGroup } from "react-bootstrap";
-import axios from "axios";
+import axios_api from "../utils/axiosInstance";
 
 const nutrientList = [
   "Calories", "Fat", "Saturated Fat", "Trans Fat", "Carbohydrates", "Protein", "Cholesterol",
@@ -35,12 +35,11 @@ const RecipePopup = ({ recipe, onClose }) => {
     }
 
     try {
-      await axios.post(
-        "/api/user/recipes/",
+      await axios_api.post(
+        "/user/recipes/",
         { recipe },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -62,12 +61,11 @@ const RecipePopup = ({ recipe, onClose }) => {
     }
 
     try {
-      await axios.delete(
-        "/api/user/recipes/",
+      await axios_api.delete(
+        "/user/recipes/",
         {
           data: { recipe_id: id },
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -86,11 +84,7 @@ const RecipePopup = ({ recipe, onClose }) => {
       if (!token) return;
   
       try {
-        const response = await axios.get("/api/user/recipes/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios_api.get("/user/recipes/");
   
         // Check if the recipe ID exists in the saved recipes
         const savedRecipes = response.data.recipes || [];

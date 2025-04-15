@@ -51,6 +51,7 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
 
     diets = serializers.MultipleChoiceField(choices=DIET_CHOICES)
     intolerances = serializers.MultipleChoiceField(choices=INTOLERANCE_CHOICES)
+    calorie_limit = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = UserPreferences
@@ -62,11 +63,18 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
     def validate_intolerances(self, value):
         return list(value)
 
-    # Method to validate the calorie limit
-    def validate_calorie_limit(self, value):
-        if value < 0 or value > 9999:
-            raise serializers.ValidationError("Calorie limit must be between 0 and 9999.")
-        return value
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        # Handle empty or invalid calorie_limit
+        calorie_limit = data.get("calorie_limit")
+        if calorie_limit in [None, ""]:
+            data["calorie_limit"] = 9999  # Default to 9999 if empty
+        else:
+            try:
+                data["calorie_limit"] = int(calorie_limit)  # Convert to integer
+            except ValueError:
+                data["calorie_limit"] = 9999  # Default to 9999 if invalid
+        return data
     
 class UserCollectionsSerializer(serializers.ModelSerializer):
     class Meta:

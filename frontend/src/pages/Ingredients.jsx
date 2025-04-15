@@ -6,7 +6,7 @@ import IngredientPopup from "../components/IngredientPopup";
 import { Container, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Color.css";
-import axios from 'axios';
+import axios_api from "../utils/axiosInstance";
 
 function Ingredients() {
   const [selectedIngredient, setSelectedIngredient] = useState(null);
@@ -20,7 +20,7 @@ function Ingredients() {
     setLoading(true);
     try {
       // 1. Fetch ingredient IDs based on search term
-      const response = await axios.get(`/api/search/ingredients`, {
+      const response = await axios_api.get(`/search/ingredients`, {
         params: {
           query: searchTerm
         }
@@ -28,7 +28,7 @@ function Ingredients() {
 
       // 2. Fetch detailed data for each ingredient by its ID
       const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
-        const ingredientResponse = await axios.get(`/api/ingredients/${ingredient.id}`);
+        const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, {noAuth: true});
         return ingredientResponse.data; // Return the detailed ingredient data
       });
 
@@ -52,10 +52,7 @@ function Ingredients() {
   
     setLoading(true);
     try {
-      const response = await axios.get(`/api/user/ingredients`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios_api.get(`/user/ingredients`, {
       });
       setIngredients(response.data.ingredients);
     } catch (err) {

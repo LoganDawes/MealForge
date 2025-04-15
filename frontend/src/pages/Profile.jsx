@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navigationbar from "../components/Navbar";
 import { Form, Card, Container, Button, Dropdown } from "react-bootstrap";
 import "./Color.css";
-import axios from "axios";
+import axios_api from "../utils/axiosInstance";
 
 const dietOptions = [
   "Gluten Free", "Ketogenic", "Vegetarian", "Lacto-vegetarian", "Ovo-vegetarian",
@@ -64,14 +64,10 @@ const Profile = () => {
   useEffect(() => {
     const fetchPreferences = async () => {
       try {
-        const response = await axios.get("/api/preferences/", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const response = await axios_api.get("/preferences/");
         setSelectedDiets(response.data.diets);
         setSelectedIntolerances(response.data.intolerances);
-        setCalorieLimit(response.data.calorie_limit);
+        setCalorieLimit(response.data.calorie_limit === 9999 ? "" : response.data.calorie_limit);
       } catch (error) {
         console.error("Error fetching preferences:", error);
       }
@@ -83,20 +79,13 @@ const Profile = () => {
   // Update preferences on the backend
   const updatePreferences = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-
-      const response = await axios.put(
-        "/api/preferences/update/",
+      const response = await axios_api.put(
+        "/preferences/update/",
         {
           diets: selectedDiets,
           intolerances: selectedIntolerances,
-          calorie_limit: calorieLimit,
+          calorie_limit: calorieLimit === "" ? 9999 : calorieLimit,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
       );
       console.log("Preferences updated:", response.data);
     } catch (error) {
@@ -115,7 +104,7 @@ const Profile = () => {
   // Handle calorie limit
   const handleCalorieChange = (e) => {
     const value = e.target.value;
-    if (/^\d{0,4}$/.test(value)) {
+    if (value === "" || /^\d{0,4}$/.test(value)) {
       setCalorieLimit(value);
     }
   };
@@ -156,10 +145,11 @@ const Profile = () => {
               type="number"
               min="0"
               max="9999"
-              value={calorieLimit}
+              value={calorieLimit === "" ? "" : calorieLimit} // Display empty for "No Limit"
               onChange={handleCalorieChange}
               placeholder="Enter calorie limit"
             />
+            {calorieLimit === "" && <small className="text-muted">No Limit</small>} {/* Display "No Limit" as a hint */}
           </Form.Group>
 
           <Button variant="primary" className="w-100 mt-3" onClick={handleSavePreferences}>

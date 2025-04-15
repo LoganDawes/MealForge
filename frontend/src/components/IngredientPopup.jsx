@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form } from "react-bootstrap";
-import axios from "axios";
 import "./IngredientPopup.css";
+import axios_api from "../utils/axiosInstance";
 
 const nutrientList = [
   "Calories", "Fat", "Saturated Fat", "Trans Fat", "Carbohydrates", "Protein", "Cholesterol",
@@ -30,12 +30,11 @@ const IngredientPopup = ({ ingredient, onClose }) => {
     }
 
     try {
-      await axios.post(
-        "/api/user/ingredients/",
+      await axios_api.post(
+        "/user/ingredients/",
         { ingredient },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -57,12 +56,11 @@ const IngredientPopup = ({ ingredient, onClose }) => {
     }
 
     try {
-      await axios.delete(
-        "/api/user/ingredients/",
+      await axios_api.delete(
+        "/user/ingredients/",
         {
           data: { ingredient_id: ingredient.id },
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -82,11 +80,7 @@ const IngredientPopup = ({ ingredient, onClose }) => {
       if (!token) return;
 
       try {
-        const response = await axios.get("/api/user/ingredients/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios_api.get("/user/ingredients/");
 
         // Check if the ingredient ID exists in the saved ingredients
         const savedIngredients = response.data.ingredients || [];
@@ -113,8 +107,9 @@ const IngredientPopup = ({ ingredient, onClose }) => {
   useEffect(() => {
     const fetchNutrition = async () => {
       try {
-        const res = await axios.get(`/api/ingredients/${ingredient.id}`, {
-          params: { amount, unit }
+        const res = await axios_api.get(`/ingredients/${ingredient.id}`, {
+          params: { amount, unit },
+          noAuth: true,
         });
         setNutrition(res.data.nutrition);
       } catch (err) {

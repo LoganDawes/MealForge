@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Card, Container } from "react-bootstrap";
 import "./Color.css";
-import axios from "axios";
+import axios_api from "../utils/axiosInstance";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -15,9 +15,11 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/login/", {
+      const res = await axios_api.post("/login/", {
         username: username,
-        password: password
+        password: password,
+      }, {
+        noAuth: true,
       });
 
       localStorage.setItem("username", username);

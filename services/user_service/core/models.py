@@ -15,7 +15,7 @@ class UserPreferences(models.Model):
     intolerances = models.JSONField(default=list)
 
     # Integer calorie limit
-    calorie_limit = models.IntegerField(default=2000)
+    calorie_limit = models.IntegerField(default=9999)
 
     def __str__(self):
         return f"Preferences for {self.user.username}"
