@@ -39,7 +39,7 @@ function Recipes() {
     <div className="Recipes">
       <Navigationbar />
       <SubNavbar pageTitle="Recipes" onSearch={handleSearch} />
-      
+
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
         <Row>
           {loading ? (

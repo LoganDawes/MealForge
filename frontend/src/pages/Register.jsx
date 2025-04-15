@@ -25,7 +25,7 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    
+
     // Detect if the password and confirm password fields match
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
@@ -54,7 +54,7 @@ const Register = () => {
       navigate("/");
     } catch (error) {
       console.error("Registration/Login Error:", error);
-    
+
       if (error.response) {
         // Backend returned a response
         console.error("Response data:", error.response.data);

@@ -51,37 +51,37 @@ const RecipePopup = ({ recipe, onClose }) => {
           {/* Middle Column: Nutrition Table */}
           <div className="popup-nutrition" style={{ flex: 1, paddingRight: "10px", display: "flex", flexDirection: "column", marginBottom: "0", height: "100%" }}>
             <div className="d-flex justify-content-between align-items-start">
-                <h3>{title}</h3>
+              <h3>{title}</h3>
             </div>
 
-                      {/* Serving Size */}
-                      <div className="d-flex gap-2 mt-3">
+            {/* Serving Size */}
+            <div className="d-flex gap-2 mt-3">
               <Form.Label className="pt-2">Serving Size:</Form.Label>
               <span>{servings}</span>
             </div>
 
             {/* Stretch the table container to fill available space */}
             <div className="table-scroll" style={{ minHeight: "600px", overflowY: "auto" }}>
-                <Table striped bordered hover size="sm">
+              <Table striped bordered hover size="sm">
                 <thead>
-                    <tr>
+                  <tr>
                     <th>Name</th>
                     <th>Amount</th>
                     <th>% Daily</th>
-                    </tr>
+                  </tr>
                 </thead>
                 <tbody>
-                    {nutrientList.map((nutrient, idx) => (
+                  {nutrientList.map((nutrient, idx) => (
                     <tr key={idx}>
-                    <td className={indented.includes(nutrient) ? "ps-4" : ""}>{nutrient}</td>
+                      <td className={indented.includes(nutrient) ? "ps-4" : ""}>{nutrient}</td>
                       <td>{nutrition.nutrients.find(n => n.name === nutrient)?.amount ?? "-----"}</td>
                       <td>{nutrition.nutrients.find(n => n.name === nutrient)?.percentOfDailyNeeds ?? "-----"}</td>
-                  </tr>
-                    ))}
+                    </tr>
+                  ))}
                 </tbody>
-                </Table>
+              </Table>
             </div>
-            </div>
+          </div>
 
           {/* Right Column: Ingredients (top half) and Steps (bottom half) */}
           <div className="popup-details" style={{ flex: 1, paddingLeft: "20px", display: "flex", flexDirection: "column" }}>

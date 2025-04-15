@@ -32,7 +32,7 @@ function Ingredients() {
 
       // Wait for all API calls to complete
       const fullIngredients = await Promise.all(ingredientDetailsPromises);
-      
+
       // 3. Update state with the full ingredient data
       setIngredients(fullIngredients);
     } catch (error) {
@@ -50,7 +50,7 @@ function Ingredients() {
     <div className="Ingredients">
       <Navigationbar />
       <SubNavbar pageTitle="Ingredients" onSearch={handleSearch} />
-      
+
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
         <Row>
           {loading ? (

@@ -50,7 +50,7 @@ const IngredientPopup = ({ ingredient, onClose }) => {
       <Card className="popup-card d-flex flex-row">
         {/* Left: Image + Info */}
         <div className="popup-left">
-          <img src={imageUrl} alt={ingredient.name}/>
+          <img src={imageUrl} alt={ingredient.name} />
         </div>
 
         {/* Right: Details */}
