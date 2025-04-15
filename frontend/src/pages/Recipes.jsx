@@ -15,22 +15,32 @@ function Recipes() {
   const [activeTab, setActiveTab] = useState("search");
 
   // Function to handle search
-  const handleSearch = async (searchTerm) => {
+  const handleSearch = async (
+    searchText = "",
+    selectedDiets = [],
+    selectedIntolerances = [],
+    sortOption = "",
+    sortDirection = ""
+) => {
     setLoading(true);
     try {
-      const response = await axios_api.get(`/search/recipes`, {
-        params: {
-          query: searchTerm,
-          addRecipeNutrition: true,
-          addRecipeInstructions: true
-        }
-      });
-      setRecipes(response.data.results); // Update the state with the search results
+        const response = await axios_api.get(`/search/recipes`, {
+            params: {
+                query: searchText,
+                diet: selectedDiets.join(","),
+                intolerances: selectedIntolerances.join(","),
+                sort: sortOption,
+                sortDirection: sortDirection,
+                addRecipeNutrition: true,
+                addRecipeInstructions: true
+            }
+        });
+        setRecipes(response.data.results); // Update the state with the search results
     } catch (error) {
-      console.error("Error fetching recipes:", error);
+        console.error("Error fetching recipes:", error);
     }
     setLoading(false);
-  };
+};
 
   // Function to fetch saved recipes
   const fetchSavedRecipes = async () => {
