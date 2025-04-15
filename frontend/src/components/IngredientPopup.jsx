@@ -17,8 +17,88 @@ const IngredientPopup = ({ ingredient, onClose }) => {
   const [amount, setAmount] = useState(ingredient.amount || 1);
   const [unit, setUnit] = useState(ingredient.unit || "unit");
   const [nutrition, setNutrition] = useState(ingredient.nutrition || { nutrients: [] });
+  const [isSaved, setIsSaved] = useState(false); // State to track if the ingredient is saved
 
   const imageUrl = ingredient.image ? `https://img.spoonacular.com/ingredients_100x100/${ingredient.image}` : '';
+
+  // Function to save the ingredient
+  const handleSaveIngredient = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("You must be logged in to save ingredients.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "/api/user/ingredients/",
+        { ingredient },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Ingredient saved successfully!");
+      setIsSaved(true); // Update state to reflect the ingredient is saved
+    } catch (error) {
+      console.error("Error saving ingredient:", error);
+      alert("Failed to save the ingredient. Please try again.");
+    }
+  };
+
+  // Function to remove the ingredient
+  const handleRemoveIngredient = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("You must be logged in to remove ingredients.");
+      return;
+    }
+
+    try {
+      await axios.delete(
+        "/api/user/ingredients/",
+        {
+          data: { ingredient_id: ingredient.id },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Ingredient removed successfully!");
+      setIsSaved(false); // Update state to reflect the ingredient is no longer saved
+    } catch (error) {
+      console.error("Error removing ingredient:", error);
+      alert("Failed to remove the ingredient. Please try again.");
+    }
+  };
+
+  // Check if the ingredient is saved when the popup opens
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+
+      try {
+        const response = await axios.get("/api/user/ingredients/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Check if the ingredient ID exists in the saved ingredients
+        const savedIngredients = response.data.ingredients || [];
+        const isIngredientSaved = savedIngredients.some((savedIngredient) => savedIngredient.id === ingredient.id);
+        setIsSaved(isIngredientSaved); // Update state based on whether the ingredient is saved
+      } catch (error) {
+        console.error("Error checking if ingredient is saved:", error);
+      }
+    };
+
+    checkIfSaved();
+  }, [ingredient.id]);
 
   // Close on outside click
   useEffect(() => {
@@ -58,7 +138,11 @@ const IngredientPopup = ({ ingredient, onClose }) => {
           <div className="d-flex justify-content-between align-items-start">
             <h3>{ingredient.name}</h3>
             <div className="d-flex align-items-center gap-2">
-              <Button variant="success">+</Button>
+              {isSaved ? (
+                <Button variant="danger" onClick={handleRemoveIngredient}>-</Button>
+              ) : (
+                <Button variant="success" onClick={handleSaveIngredient}>+</Button>
+              )}
               <Button variant="outline-danger" onClick={onClose}>X</Button>
             </div>
           </div>

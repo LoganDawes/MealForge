@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form, ListGroup } from "react-bootstrap";
+import axios from "axios";
 
 const nutrientList = [
   "Calories", "Fat", "Saturated Fat", "Trans Fat", "Carbohydrates", "Protein", "Cholesterol",
@@ -13,6 +14,7 @@ const indented = ["Saturated Fat", "Trans Fat"];
 
 const RecipePopup = ({ recipe, onClose }) => {
   const {
+    id,
     image,
     title,
     sourceUrl,
@@ -21,6 +23,86 @@ const RecipePopup = ({ recipe, onClose }) => {
     analyzedInstructions = [],
     servings = "",
   } = recipe;
+
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Function to save the recipe
+  const handleSaveRecipe = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("You must be logged in to save recipes.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "/api/user/recipes/",
+        { recipe },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Recipe saved successfully!");
+      setIsSaved(true);
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+      alert("Failed to save the recipe. Please try again.");
+    }
+  };
+
+  // Function to remove the recipe
+  const handleRemoveRecipe = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("You must be logged in to remove recipes.");
+      return;
+    }
+
+    try {
+      await axios.delete(
+        "/api/user/recipes/",
+        {
+          data: { recipe_id: id },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Recipe removed successfully!");
+      setIsSaved(false);
+    } catch (error) {
+      console.error("Error removing recipe:", error);
+      alert("Failed to remove the recipe. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+  
+      try {
+        const response = await axios.get("/api/user/recipes/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // Check if the recipe ID exists in the saved recipes
+        const savedRecipes = response.data.recipes || [];
+        const isRecipeSaved = savedRecipes.some((savedRecipe) => savedRecipe.id === id);
+        setIsSaved(isRecipeSaved); // Update state based on whether the recipe is saved
+      } catch (error) {
+        console.error("Error checking if recipe is saved:", error);
+      }
+    };
+  
+    checkIfSaved();
+  }, [id]);
 
   // Close on outside click
   useEffect(() => {
@@ -35,15 +117,21 @@ const RecipePopup = ({ recipe, onClose }) => {
     <div className="popup-overlay">
       <Card className="popup-card d-flex flex-row" style={{ width: "90%", maxWidth: "1200px", height: "80vh" }}>
         {/* Left Column: Image + Info */}
-        <div className="popup-left p-3" style={{ flex: 1 }}>
-          <img src={image} alt={title} className="img-fluid rounded mb-3" />
-          <div>
+        <div className="popup-left p-3" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {/* Image */}
+          <img src={image} alt={title} className="img-fluid rounded mb-3" style={{ maxWidth: "100%", height: "auto" }} />
+
+          {/* Source Link */}
+          <div className="mb-2" style={{ width: "100%", textAlign: "center" }}>
             <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {sourceUrl}
             </a>
           </div>
-          <div><strong>Diets:</strong> {diets.join(", ")}</div>
-          {/*<div><strong>Intolerances:</strong> {intolerances.join(", ")}</div>*/}
+
+          {/* Diets List */}
+          <div style={{ width: "100%", textAlign: "center" }}>
+            <strong>Diets:</strong> {diets.join(", ")}
+          </div>
         </div>
 
         {/* Middle and Right Columns Container */}
@@ -55,8 +143,8 @@ const RecipePopup = ({ recipe, onClose }) => {
             </div>
 
             {/* Serving Size */}
-            <div className="d-flex gap-2 mt-3">
-              <Form.Label className="pt-2">Serving Size:</Form.Label>
+            <div className="d-flex align-items-center gap-2 mt-3">
+              <Form.Label className="mb-0">Serving Size:</Form.Label>
               <span>{servings}</span>
             </div>
 
@@ -85,9 +173,13 @@ const RecipePopup = ({ recipe, onClose }) => {
 
           {/* Right Column: Ingredients (top half) and Steps (bottom half) */}
           <div className="popup-details" style={{ flex: 1, paddingLeft: "20px", display: "flex", flexDirection: "column" }}>
-            {/* Save + Close Buttons */}
+            {/* Save/Remove + Close Buttons */}
             <div className="d-flex justify-content-end gap-2 mb-3">
-              <Button variant="success">+</Button>
+              {isSaved ? (
+                <Button variant="danger" onClick={handleRemoveRecipe}>-</Button>
+              ) : (
+                <Button variant="success" onClick={handleSaveRecipe}>+</Button>
+              )}
               <Button variant="outline-danger" onClick={onClose}>X</Button>
             </div>
 

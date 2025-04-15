@@ -12,9 +12,11 @@ function Ingredients() {
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [ingredients, setIngredients] = useState([]); // State to store ingredient search results
   const [loading, setLoading] = useState(false); // Loading state for search results
+  const [activeTab, setActiveTab] = useState("search");
 
   // Function to handle search
   const handleSearch = async (searchTerm) => {
+    if (activeTab !== "search") return;
     setLoading(true);
     try {
       // 1. Fetch ingredient IDs based on search term
@@ -41,15 +43,51 @@ function Ingredients() {
     setLoading(false);
   };
 
-  // Fetch ingredients initially with an empty search term
+  const fetchSavedIngredients = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setIngredients([]); // Set ingredients to an empty array if no token is available
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/user/ingredients`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setIngredients(response.data.ingredients);
+    } catch (err) {
+      console.error("Failed to load saved ingredients:", err);
+      setIngredients([]); // Set ingredients to an empty array in case of an error
+    }
+    setLoading(false);
+  };
+
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  // Fetch ingredients when activeTab changes
   useEffect(() => {
-    handleSearch(""); // Fetch ingredients on initial load
-  }, []);
+    if (activeTab === "search") {
+      handleSearch(""); // Trigger search with an empty term
+    } else if (activeTab === "saved") {
+      fetchSavedIngredients();
+    }
+  }, [activeTab]);
 
   return (
     <div className="Ingredients">
       <Navigationbar />
-      <SubNavbar pageTitle="Ingredients" onSearch={handleSearch} />
+      <SubNavbar
+        pageTitle="Ingredients"
+        onSearch={handleSearch}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
         <Row>

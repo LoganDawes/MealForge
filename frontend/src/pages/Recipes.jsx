@@ -12,6 +12,7 @@ function Recipes() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]); // State to store recipe search results
   const [loading, setLoading] = useState(false); // Loading state for search results
+  const [activeTab, setActiveTab] = useState("search");
 
   // Function to handle search
   const handleSearch = async (searchTerm) => {
@@ -31,14 +32,52 @@ function Recipes() {
     setLoading(false);
   };
 
+  // Function to fetch saved recipes
+  const fetchSavedRecipes = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setRecipes([]); // Set recipes to an empty array if no token is available
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/user/recipes`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRecipes(response.data.recipes); // Assuming the API returns a list of saved recipes
+    } catch (err) {
+      console.error("Failed to load saved recipes:", err);
+      setRecipes([]); // Set recipes to an empty array in case of an error
+    }
+    setLoading(false);
+  };
+
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  // Fetch recipes when activeTab changes
   useEffect(() => {
-    handleSearch(""); // Fetch recipes with an empty search term initially
-  }, []);
+    if (activeTab === "search") {
+      handleSearch(""); // Trigger search with an empty term
+    } else if (activeTab === "saved") {
+      fetchSavedRecipes();
+    }
+  }, [activeTab]);
 
   return (
     <div className="Recipes">
       <Navigationbar />
-      <SubNavbar pageTitle="Recipes" onSearch={handleSearch} />
+      <SubNavbar
+        pageTitle="Recipes"
+        onSearch={handleSearch}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
         <Row>

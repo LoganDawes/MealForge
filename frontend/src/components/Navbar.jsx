@@ -10,18 +10,18 @@ const Navigationbar = () => {
   const username = localStorage.getItem("username");
 
   return (
-    <Navbar bg="light" expand="lg" className="px-3 fixed-top">
+    <Navbar style={{ backgroundColor: "#461bb2" }} expand="lg" className="px-3 fixed-top">
       <Container fluid className="d-flex justify-content-between">
-        <Navbar.Brand as={Link} to="/">MealForge</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/" style={{ color: "white" }}>MealForge</Navbar.Brand>
 
         <Nav className="mx-auto">
-          <Nav.Link as={Link} to="/ingredients">Ingredients</Nav.Link>
-          <Nav.Link as={Link} to="/recipes">Recipes</Nav.Link>
+          <Nav.Link as={Link} to="/ingredients" style={{ color: "white" }}>Ingredients</Nav.Link>
+          <Nav.Link as={Link} to="/recipes" style={{ color: "white" }}>Recipes</Nav.Link>
         </Nav>
 
         <Nav>
-          {isLoggedIn && <Nav.Link as={Link} to="/profile">{username}</Nav.Link>}
-          <NavDropdown title={<span className="bi bi-person-circle"></span>} id="profile-dropdown" align="end">
+          {isLoggedIn && <Nav.Link as={Link} to="/profile" style={{ color: "white" }}>{username}</Nav.Link>}
+          <NavDropdown title={<span className="bi bi-person-circle" style={{ color: "white" }}></span>} id="profile-dropdown" align="end">
             {isLoggedIn ? (
               <>
                 <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
