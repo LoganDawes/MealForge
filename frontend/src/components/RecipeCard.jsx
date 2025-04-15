@@ -2,6 +2,11 @@ import React from "react";
 import { Card, Table } from "react-bootstrap";
 import "./RecipeCard.css";
 
+const capitalizeFirstLetter = (string) => {
+  if (!string) return "";
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 const RecipeCard = ({
   image,
   title,
@@ -20,7 +25,7 @@ const RecipeCard = ({
   return (
     <Card className="mb-3 d-flex flex-row" style={{ height: "350px" }} onClick={onClick}>
       {/* Left side: Image, Link, Diets */}
-      <div style={{ width: "30%", minWidth: "200px" }} className="p-2 d-flex flex-column justify-content-between">
+      <div style={{ width: "30%", minWidth: "200px" }} className="p-2 d-flex flex-column">
         <img src={image} alt={title} className="img-fluid rounded" style={{ objectFit: "cover", height: "150px" }} />
 
         {/* Recipe Link */}
@@ -29,12 +34,15 @@ const RecipeCard = ({
         </a>
 
         {/* Diet Alignments */}
-        <div className="mt-1">
+        <div className="mt-2">
           <strong>Diets:</strong>
           <ul className="mb-0 ps-3">
-            {diets.map((diet, idx) => (
-              <li key={idx}><span className="text-success">✅</span> {diet}</li>
+            {diets.slice(0, 4).map((diet, idx) => (
+              <li key={idx}>
+                <span className="text-success">✅</span> {diet}
+              </li>
             ))}
+            {diets.length > 4 && <li>...</li>}
           </ul>
         </div>
       </div>
@@ -42,7 +50,16 @@ const RecipeCard = ({
       {/* Right side: Title, Nutrition, Ingredients */}
       <Card.Body className="d-flex flex-column" style={{ overflow: "hidden" }}>
         <div>
-          <Card.Title>{title}</Card.Title>
+        <Card.Title
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis"
+            }}
+            title={capitalizeFirstLetter(title)} // Tooltip to show full title on hover
+          >
+            {capitalizeFirstLetter(title)}
+          </Card.Title>
 
           <Table size="sm" className="mb-2">
             <thead>

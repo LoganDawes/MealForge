@@ -13,6 +13,11 @@ const nutrientList = [
 
 const indented = ["Saturated Fat", "Trans Fat"];
 
+const capitalizeFirstLetter = (string) => {
+  if (!string) return "";
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 const IngredientPopup = ({ ingredient, onClose }) => {
   const [amount, setAmount] = useState(ingredient.amount || 1);
   const [unit, setUnit] = useState(ingredient.unit || "unit");
@@ -131,7 +136,7 @@ const IngredientPopup = ({ ingredient, onClose }) => {
         {/* Right: Details */}
         <Card.Body className="popup-right">
           <div className="d-flex justify-content-between align-items-start">
-            <h3>{ingredient.name}</h3>
+            <h3>{capitalizeFirstLetter(ingredient.name)}</h3>
             <div className="d-flex align-items-center gap-2">
               {isSaved ? (
                 <Button variant="danger" onClick={handleRemoveIngredient}>-</Button>

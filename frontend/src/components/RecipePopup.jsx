@@ -12,6 +12,11 @@ const nutrientList = [
 
 const indented = ["Saturated Fat", "Trans Fat"];
 
+const capitalizeFirstLetter = (string) => {
+  if (!string) return "";
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 const RecipePopup = ({ recipe, onClose }) => {
   const {
     id,
@@ -133,7 +138,7 @@ const RecipePopup = ({ recipe, onClose }) => {
           {/* Middle Column: Nutrition Table */}
           <div className="popup-nutrition" style={{ flex: 1, paddingRight: "10px", display: "flex", flexDirection: "column", marginBottom: "0", height: "100%" }}>
             <div className="d-flex justify-content-between align-items-start">
-              <h3>{title}</h3>
+              <h3>{capitalizeFirstLetter(title)}</h3>
             </div>
 
             {/* Serving Size */}

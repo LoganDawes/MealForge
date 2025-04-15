@@ -2,6 +2,11 @@ import React from "react";
 import { Card, Table } from "react-bootstrap";
 import "./IngredientCard.css";
 
+const capitalizeFirstLetter = (string) => {
+  if (!string) return "";
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 const IngredientCard = ({ image, name, nutrition = { nutrients: [] }, onClick }) => {
   const imageUrl = image ? `https://img.spoonacular.com/ingredients_100x100/${image}` : '';
 
@@ -25,7 +30,7 @@ const IngredientCard = ({ image, name, nutrition = { nutrients: [] }, onClick })
 
       <Card.Body>
         {/* Name */}
-        <Card.Title>{name}</Card.Title>
+        <Card.Title>{capitalizeFirstLetter(name)}</Card.Title>
 
         {/* Nutrition Table */}
         <Table size="sm" className="mb-2">
