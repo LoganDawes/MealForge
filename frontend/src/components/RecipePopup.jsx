@@ -17,7 +17,23 @@ const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const RecipePopup = ({ recipe, onClose }) => {
+// Mapping function to normalize diets
+const normalizeDiet = (diet) => {
+  const dietMapping = {
+    "gluten free": "Gluten Free",
+    "ketogenic": "Ketogenic",
+    "lacto ovo vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "pescetarian": "Pescetarian",
+    "paleolithic": "Paleo",
+    "primal": "Primal",
+    "fodmap friendly": "Low FODMAP",
+    "whole 30": "Whole30"
+  };
+  return dietMapping[diet.toLowerCase()] || diet; // Default to original if no match
+};
+
+const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = [] }) => {
   const {
     id,
     image,
@@ -30,6 +46,19 @@ const RecipePopup = ({ recipe, onClose }) => {
   } = recipe;
 
   const [isSaved, setIsSaved] = useState(false);
+
+  // Normalize diets to match selectedDiets format
+  const normalizedDiets = diets.map(normalizeDiet);
+
+  // Sort diets: selectedDiets first
+  const sortedDiets = [...normalizedDiets].sort((a, b) => {
+    const aIsSelected = selectedDiets.includes(a);
+    const bIsSelected = selectedDiets.includes(b);
+    return bIsSelected - aIsSelected; // Selected diets come first
+  });
+
+  // Extract IDs of used ingredients for quick lookup
+  const usedIngredientIds = usedIngredients.map((ingredient) => ingredient.id);
 
   // Function to save the recipe
   const handleSaveRecipe = async () => {
@@ -87,10 +116,10 @@ const RecipePopup = ({ recipe, onClose }) => {
     const checkIfSaved = async () => {
       const token = localStorage.getItem("accessToken");
       if (!token) return;
-  
+
       try {
         const response = await axios_api.get("/user/recipes/");
-  
+
         // Check if the recipe ID exists in the saved recipes
         const savedRecipes = response.data.recipes || [];
         const isRecipeSaved = savedRecipes.some((savedRecipe) => savedRecipe.id === id);
@@ -99,7 +128,7 @@ const RecipePopup = ({ recipe, onClose }) => {
         console.error("Error checking if recipe is saved:", error);
       }
     };
-  
+
     checkIfSaved();
   }, [id]);
 
@@ -129,7 +158,14 @@ const RecipePopup = ({ recipe, onClose }) => {
 
           {/* Diets List */}
           <div style={{ width: "100%", textAlign: "center" }}>
-            <strong>Diets:</strong> {diets.join(", ")}
+            <strong>Diets:</strong>
+            <ul className="mb-0 ps-3">
+              {sortedDiets.map((diet, idx) => (
+                <li key={idx}>
+                  {selectedDiets.includes(diet) ? "✅" : "⬜️"} {diet}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -188,7 +224,7 @@ const RecipePopup = ({ recipe, onClose }) => {
               <ListGroup className="mb-3">
                 {nutrition.ingredients.map((ing, idx) => (
                   <ListGroup.Item key={idx} className="d-flex justify-content-between">
-                    <span>{ing.saved ? "✅" : "⬜️"} {ing.amount}{" "}{ing.unit}{" "}{ing.name}</span>
+                    <span>{usedIngredientIds.includes(ing.id) ? "✅" : "⬜️"} {ing.amount}{" "}{ing.unit}{" "}{ing.name}</span>
                   </ListGroup.Item>
                 ))}
               </ListGroup>

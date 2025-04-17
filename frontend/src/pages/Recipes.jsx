@@ -37,7 +37,7 @@ function Recipes() {
     selectedIntolerances = [],
     sortOption = "",
     sortDirection = ""
-) => {
+  ) => {
     setLoading(true);
 
     let includeIngredients = [];
@@ -48,25 +48,25 @@ function Recipes() {
     }
 
     try {
-        const response = await axios_api.get(`/search/recipes`, {
-            params: {
-                query: searchText,
-                diet: selectedDiets.join(","),
-                intolerances: selectedIntolerances.join(","),
-                sort: sortOption,
-                sortDirection: sortDirection,
-                includeIngredients: includeIngredients,
-                fillIngredients: true,
-                addRecipeNutrition: true,
-                addRecipeInstructions: true
-            }
-        });
-        setRecipes(response.data.results); // Update the state with the search results
+      const response = await axios_api.get(`/search/recipes`, {
+        params: {
+          query: searchText,
+          diet: selectedDiets.join(","),
+          intolerances: selectedIntolerances.join(","),
+          sort: sortOption,
+          sortDirection: sortDirection,
+          includeIngredients: includeIngredients,
+          fillIngredients: true,
+          addRecipeNutrition: true,
+          addRecipeInstructions: true
+        }
+      });
+      setRecipes(response.data.results); // Update the state with the search results
     } catch (error) {
-        console.error("Error fetching recipes:", error);
+      console.error("Error fetching recipes:", error);
     }
     setLoading(false);
-};
+  };
 
   // Function to fetch saved recipes
   const fetchSavedRecipes = async () => {
@@ -120,9 +120,9 @@ function Recipes() {
             recipes.map((recipe, index) => (
               <Col key={index} xs={12} md={6} lg={4}>
                 <RecipeCard {...recipe}
-                usedIngredients={recipe.usedIngredients}
-                selectedDiets={selectedDiets}
-                onClick={() => setSelectedRecipe(recipe)} />
+                  usedIngredients={recipe.usedIngredients}
+                  selectedDiets={selectedDiets}
+                  onClick={() => setSelectedRecipe(recipe)} />
               </Col>
             ))
           )}
@@ -130,7 +130,12 @@ function Recipes() {
       </Container>
 
       {selectedRecipe && (
-        <RecipePopup recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
+        <RecipePopup
+          recipe={selectedRecipe}
+          onClose={() => setSelectedRecipe(null)}
+          selectedDiets={selectedDiets} // Pass selected diets
+          usedIngredients={selectedRecipe.usedIngredients || []} // Pass used ingredients
+        />
       )}
     </div>
   );

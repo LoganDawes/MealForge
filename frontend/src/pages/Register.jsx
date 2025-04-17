@@ -56,6 +56,7 @@ const Register = () => {
       localStorage.setItem("refreshToken", loginRes.data.refresh_token);
 
       navigate("/");
+      navigate(0);
     } catch (error) {
       console.error("Registration/Login Error:", error);
 
