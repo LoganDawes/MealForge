@@ -18,24 +18,28 @@ const SORT_OPTIONS = [
     "cholesterol", "total-fat", "trans-fat", "saturated-fat", "fiber", "protein", "sugar"
 ];
 
-const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange }) => {
+const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange }) => {
     const [searchText, setSearchText] = useState("");
     const [selectedDiets, setSelectedDiets] = useState([]);
     const [selectedIntolerances, setSelectedIntolerances] = useState([]);
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [sortOption, setSortOption] = useState("");
-    const [sortDirection, setSortDirection] = useState("asc");
+    const [sortDirection, setSortDirection] = useState("desc");
 
     const handleSearch = () => {
         onSearch(searchText, selectedDiets, selectedIntolerances, sortOption, sortDirection);
     };
 
     const toggleSelection = (item, list, setList) => {
-        if (list.includes(item)) {
-            setList(list.filter((i) => i !== item));
-        } else {
-            setList([...list, item]);
+        const updatedList = list.includes(item)
+            ? list.filter((i) => i !== item)
+            : [...list, item];
+        setList(updatedList);
+
+        // Notify parent about filter changes
+        if (setList === setSelectedDiets) {
+            onFilterChange(updatedList); // Pass updated diets to parent
         }
     };
 

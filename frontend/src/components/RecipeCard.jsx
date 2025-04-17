@@ -7,12 +7,28 @@ const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+const normalizeDiet = (diet) => {
+  const dietMapping = {
+    "gluten free": "Gluten Free",
+    "ketogenic": "Ketogenic",
+    "lacto ovo vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "pescetarian": "Pescetarian",
+    "paleolithic": "Paleo",
+    "primal": "Primal",
+    "fodmap friendly": "Low FODMAP",
+    "whole 30": "Whole30"
+  };
+  return dietMapping[diet.toLowerCase()] || diet; // Default to original if no match
+};
+
 const RecipeCard = ({
   image,
   title,
   sourceUrl,
   nutrition = { nutrients: [], ingredients: [] },
   diets = [],
+  selectedDiets = [],
   usedIngredients = [],
   onClick
 }) => {
@@ -33,6 +49,16 @@ const RecipeCard = ({
     return bIsUsed - aIsUsed; // Used ingredients come first
   });
 
+  // Map diets to correct format
+  const normalizedDiets = diets.map(normalizeDiet);
+
+  // Sort diets: selectedDiets first
+  const sortedDiets = [...normalizedDiets].sort((a, b) => {
+    const aIsSelected = selectedDiets.includes(a);
+    const bIsSelected = selectedDiets.includes(b);
+    return bIsSelected - aIsSelected; // Selected diets come first
+  });
+
   return (
     <Card className="mb-3 d-flex flex-row" style={{ height: "350px" }} onClick={onClick}>
       {/* Left side: Image, Link, Diets */}
@@ -48,9 +74,9 @@ const RecipeCard = ({
         <div className="mt-2">
           <strong>Diets:</strong>
           <ul className="mb-0 ps-3">
-            {diets.slice(0, 4).map((diet, idx) => (
+            {sortedDiets.slice(0, 4).map((diet, idx) => (
               <li key={idx}>
-                <span className="text-success">✅</span> {diet}
+                {selectedDiets.includes(diet) ? "✅" : "⬜️"} {diet}
               </li>
             ))}
             {diets.length > 4 && <li>...</li>}
@@ -61,7 +87,7 @@ const RecipeCard = ({
       {/* Right side: Title, Nutrition, Ingredients */}
       <Card.Body className="d-flex flex-column" style={{ overflow: "hidden" }}>
         <div>
-        <Card.Title
+          <Card.Title
             style={{
               whiteSpace: "nowrap",
               overflow: "hidden",

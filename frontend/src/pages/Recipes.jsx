@@ -10,6 +10,7 @@ import axios_api from "../utils/axiosInstance";
 
 function Recipes() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [selectedDiets, setSelectedDiets] = useState([]);
   const [recipes, setRecipes] = useState([]); // State to store recipe search results
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
@@ -23,6 +24,10 @@ function Recipes() {
       console.error("Error fetching user ingredients:", error);
       return [];
     }
+  };
+
+  const handleFilterChange = (updatedDiets) => {
+    setSelectedDiets(updatedDiets); // Update selected diets
   };
 
   // Function to handle search
@@ -104,6 +109,7 @@ function Recipes() {
         onSearch={handleSearch}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        onFilterChange={handleFilterChange}
       />
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
@@ -115,6 +121,7 @@ function Recipes() {
               <Col key={index} xs={12} md={6} lg={4}>
                 <RecipeCard {...recipe}
                 usedIngredients={recipe.usedIngredients}
+                selectedDiets={selectedDiets}
                 onClick={() => setSelectedRecipe(recipe)} />
               </Col>
             ))
