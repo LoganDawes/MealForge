@@ -13,6 +13,7 @@ const RecipeCard = ({
   sourceUrl,
   nutrition = { nutrients: [], ingredients: [] },
   diets = [],
+  usedIngredients = [],
   onClick
 }) => {
   const nutritionValues = {
@@ -21,6 +22,16 @@ const RecipeCard = ({
     carbs: nutrition.nutrients.find(nutrient => nutrient.name === "Carbohydrates"),
     protein: nutrition.nutrients.find(nutrient => nutrient.name === "Protein")
   };
+
+  // Extract IDs of used ingredients for quick lookup
+  const usedIngredientIds = usedIngredients.map((ingredient) => ingredient.id);
+
+  // Sort ingredients: usedIngredients first
+  const sortedIngredients = [...nutrition.ingredients].sort((a, b) => {
+    const aIsUsed = usedIngredientIds.includes(a.id);
+    const bIsUsed = usedIngredientIds.includes(b.id);
+    return bIsUsed - aIsUsed; // Used ingredients come first
+  });
 
   return (
     <Card className="mb-3 d-flex flex-row" style={{ height: "350px" }} onClick={onClick}>
@@ -98,9 +109,9 @@ const RecipeCard = ({
         <div style={{ overflow: "hidden", flexShrink: 0 }}>
           <strong>Ingredients – {nutrition.ingredients.length}</strong>
           <ul className="mb-0 ps-3">
-            {nutrition.ingredients.slice(0, 3).map((ing, idx) => (
+            {sortedIngredients.slice(0, 3).map((ing, idx) => (
               <li key={idx}>
-                {ing.saved ? "✅" : "⬜️"} {ing.name}
+                {usedIngredientIds.includes(ing.id) ? "✅" : "⬜️"} {ing.name}
               </li>
             ))}
             {nutrition.ingredients.length > 3 && <li>...</li>}

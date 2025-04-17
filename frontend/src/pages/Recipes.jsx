@@ -14,6 +14,17 @@ function Recipes() {
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
 
+  // Function to fetch user ingredients
+  const fetchUserIngredients = async () => {
+    try {
+      const response = await axios_api.get(`/user/ingredients/update`);
+      return response.data.ingredients.map((ingredient) => ingredient.name);
+    } catch (error) {
+      console.error("Error fetching user ingredients:", error);
+      return [];
+    }
+  };
+
   // Function to handle search
   const handleSearch = async (
     searchText = "",
@@ -23,6 +34,14 @@ function Recipes() {
     sortDirection = ""
 ) => {
     setLoading(true);
+
+    let includeIngredients = [];
+
+    if (sortOption === "max-used-ingredients" || sortOption === "min-missing-ingredients") {
+      const ingredients = await fetchUserIngredients();
+      includeIngredients = ingredients.join(",");
+    }
+
     try {
         const response = await axios_api.get(`/search/recipes`, {
             params: {
@@ -31,6 +50,8 @@ function Recipes() {
                 intolerances: selectedIntolerances.join(","),
                 sort: sortOption,
                 sortDirection: sortDirection,
+                includeIngredients: includeIngredients,
+                fillIngredients: true,
                 addRecipeNutrition: true,
                 addRecipeInstructions: true
             }
@@ -52,7 +73,7 @@ function Recipes() {
 
     setLoading(true);
     try {
-      const response = await axios_api.get(`/user/recipes`);
+      const response = await axios_api.get(`/user/recipes/update`);
       setRecipes(response.data.recipes); // Assuming the API returns a list of saved recipes
     } catch (err) {
       console.error("Failed to load saved recipes:", err);
@@ -92,7 +113,9 @@ function Recipes() {
           ) : (
             recipes.map((recipe, index) => (
               <Col key={index} xs={12} md={6} lg={4}>
-                <RecipeCard {...recipe} onClick={() => setSelectedRecipe(recipe)} />
+                <RecipeCard {...recipe}
+                usedIngredients={recipe.usedIngredients}
+                onClick={() => setSelectedRecipe(recipe)} />
               </Col>
             ))
           )}

@@ -60,7 +60,7 @@ function Ingredients() {
   
     setLoading(true);
     try {
-      const response = await axios_api.get(`/user/ingredients`, {
+      const response = await axios_api.get(`/user/ingredients/update`, {
       });
       setIngredients(response.data.ingredients);
     } catch (err) {
