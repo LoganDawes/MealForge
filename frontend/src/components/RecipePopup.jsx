@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form, ListGroup } from "react-bootstrap";
+import IngredientPopup from "../components/IngredientPopup";
 import axios_api from "../utils/axiosInstance";
 
 const nutrientList = [
@@ -46,6 +47,34 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
   } = recipe;
 
   const [isSaved, setIsSaved] = useState(false);
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [ingredientDetails, setIngredientDetails] = useState(null);
+
+  // Fetch ingredient details when an ingredient is selected
+  useEffect(() => {
+    const fetchIngredientDetails = async () => {
+      console.log("Fetching ingredient details for:", selectedIngredient);
+      if (!selectedIngredient) return;
+
+      console.log(selectedIngredient.id);
+      console.log(selectedIngredient.name);
+      console.log(selectedIngredient.amount);
+      console.log(selectedIngredient.unit);
+
+      try {
+        const ingredientResponse = await axios_api.get(`/ingredients/${selectedIngredient.id}`, {
+          params: { amount: selectedIngredient.amount, unit: selectedIngredient.unit },
+          noAuth: true,
+        });
+        console.log(ingredientResponse.data);
+        setIngredientDetails(ingredientResponse.data); // Set fetched details
+      } catch (error) {
+        console.error("Error fetching ingredient details:", error);
+      }
+    };
+
+    fetchIngredientDetails();
+  }, [selectedIngredient]);
 
   // Normalize diets to match selectedDiets format
   const normalizedDiets = diets.map(normalizeDiet);
@@ -222,11 +251,33 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
             <div style={{ flex: 1, overflowY: "auto" }}>
               <strong>Ingredients – {nutrition.ingredients.length}</strong>
               <ListGroup className="mb-3">
-                {nutrition.ingredients.map((ing, idx) => (
-                  <ListGroup.Item key={idx} className="d-flex justify-content-between">
-                    <span>{usedIngredientIds.includes(ing.id) ? "✅" : "⬜️"} {ing.amount}{" "}{ing.unit}{" "}{ing.name}</span>
-                  </ListGroup.Item>
-                ))}
+                {nutrition.ingredients.map((ing, idx) => {
+                  // Ensure the ingredient has the required properties
+                  const ingredientData = {
+                    id: ing.id,
+                    name: ing.name,
+                    amount: ing.amount || 10, // Default to 10 if amount is missing
+                    unit: ing.unit || "g",   // Default to "g" if unit is missing
+                  };
+
+                  return (
+                    <ListGroup.Item
+                      key={idx}
+                      className="d-flex justify-content-between"
+                      onClick={() => {
+                        console.log("Setting selected ingredient:", ingredientData); // Log the ingredient being set
+                        setSelectedIngredient(ingredientData); // Set selected ingredient with proper structure
+                      }}
+                      style={{ cursor: "pointer" }} // Add pointer cursor for better UX
+                    >
+                      <span>
+                        {usedIngredientIds.includes(ing.id) ? "✅" : "⬜️"} {ingredientData.amount}{" "}
+                        {ingredientData.unit}{" "}
+                        {ingredientData.name}
+                      </span>
+                    </ListGroup.Item>
+                  );
+                })}
               </ListGroup>
             </div>
 
@@ -242,6 +293,17 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
           </div>
         </div>
       </Card>
+
+      {/* Render IngredientPopup if an ingredient is selected */}
+      {ingredientDetails && (
+        <IngredientPopup
+          ingredient={ingredientDetails}
+          onClose={() => {
+            setSelectedIngredient(null); // Reset selectedIngredient
+            setIngredientDetails(null); // Reset ingredientDetails
+          }}
+        />
+      )}
     </div>
   );
 };

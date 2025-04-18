@@ -21,35 +21,38 @@ function Ingredients() {
     selectedIntolerances = [],
     sortOption = "",
     sortDirection = ""
-) => {
+  ) => {
     if (activeTab !== "search") return;
     setLoading(true);
     try {
-        const response = await axios_api.get(`/search/ingredients`, {
-            params: {
-                query: searchText,
-                intolerances: selectedIntolerances.join(","),
-                sort: sortOption,
-                sortDirection: sortDirection
-            }
+      const response = await axios_api.get(`/search/ingredients`, {
+        params: {
+          query: searchText,
+          intolerances: selectedIntolerances.join(","),
+          sort: sortOption,
+          sortDirection: sortDirection
+        }
+      });
+
+      // Fetch detailed data for each ingredient by its ID
+      const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
+        const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, {
+          params: { amount: 10, unit: "g" },
+          noAuth: true
         });
+        return ingredientResponse.data; // Return the detailed ingredient data
+      });
 
-        // Fetch detailed data for each ingredient by its ID
-        const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
-            const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, { noAuth: true });
-            return ingredientResponse.data; // Return the detailed ingredient data
-        });
+      // Wait for all API calls to complete
+      const fullIngredients = await Promise.all(ingredientDetailsPromises);
 
-        // Wait for all API calls to complete
-        const fullIngredients = await Promise.all(ingredientDetailsPromises);
-
-        // Update state with the full ingredient data
-        setIngredients(fullIngredients);
+      // Update state with the full ingredient data
+      setIngredients(fullIngredients);
     } catch (error) {
-        console.error("Error fetching ingredients:", error);
+      console.error("Error fetching ingredients:", error);
     }
     setLoading(false);
-};
+  };
 
   const fetchSavedIngredients = async () => {
     const token = localStorage.getItem("accessToken");
@@ -57,7 +60,7 @@ function Ingredients() {
       setIngredients([]); // Set ingredients to an empty array if no token is available
       return;
     }
-  
+
     setLoading(true);
     try {
       const response = await axios_api.get(`/user/ingredients/update`, {

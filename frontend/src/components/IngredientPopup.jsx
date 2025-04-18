@@ -19,8 +19,8 @@ const capitalizeFirstLetter = (string) => {
 };
 
 const IngredientPopup = ({ ingredient, onClose }) => {
-  const [amount, setAmount] = useState(ingredient.amount || 1);
-  const [unit, setUnit] = useState(ingredient.unit || "unit");
+  const [amount, setAmount] = useState(ingredient.amount || 10);
+  const [unit, setUnit] = useState(ingredient.unit || "g");
   const [nutrition, setNutrition] = useState(ingredient.nutrition || { nutrients: [] });
   const [isSaved, setIsSaved] = useState(false); // State to track if the ingredient is saved
 
