@@ -65,7 +65,6 @@ class UnregisterUserView(APIView):
 
             # Send post request to Auth service
             response = requests.post(f"{AUTH_SERVICE_URL}/api/unregister/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
-            response.raise_for_status()
 
             # LOGGER : Test response data
             logger.info(f"Response from Auth Service: {response.status_code} - {response.text}")

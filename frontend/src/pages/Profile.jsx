@@ -62,6 +62,7 @@ const Profile = () => {
   const [calorieLimit, setCalorieLimit] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   // Fetch preferences when component mounts
@@ -92,6 +93,7 @@ const Profile = () => {
         },
       );
       console.log("Preferences updated:", response.data);
+      alert("Preferences saved!");
     } catch (error) {
       console.error("Error updating preferences:", error);
     }
@@ -116,7 +118,6 @@ const Profile = () => {
   // Handle save preferences
   const handleSavePreferences = () => {
     updatePreferences();
-    alert("Preferences saved!");
   };
 
   // Handle account deletion
@@ -129,29 +130,30 @@ const Profile = () => {
       return;
     }
 
-    try {
-      const response = await axios_api.post("/unregister/", {
-        username,
-        password,
-        refresh_token: refreshToken,
-      });
-      console.log("Account deleted:", response.data);
-      localStorage.removeItem("accessToken");
-      navigate("/"); // Redirect to home page
-      navigate(0); // Refresh the page
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      alert("Failed to delete account. Please try again.");
-    }
+    const response = await axios_api.post("/unregister/", {
+      username,
+      password,
+      refresh_token: refreshToken,
+    });
+    console.log("Account deleted:", response.data);
+    localStorage.removeItem("accessToken");
+    navigate("/"); // Redirect to home page
+    navigate(0); // Refresh the page
   };
 
   // Handle delete account modal
   const handleShowDeleteModal = () => setShowDeleteModal(true);
   const handleCloseDeleteModal = () => setShowDeleteModal(false);
 
-  const handleConfirmDelete = () => {
-    handleDeleteAccount();
-    setShowDeleteModal(false);
+  const handleConfirmDelete = async () => {
+    try {
+      await handleDeleteAccount(); // Attempt to delete the account
+      setShowDeleteModal(false); // Close the modal only if successful
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      const errorMessage = error.response?.data?.message || "Failed to delete account. Please try again.";
+      setErrorMessage(errorMessage); // Set the error message to display below the password field
+    }
   };
 
   return (
@@ -216,6 +218,7 @@ const Profile = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            {errorMessage && <small className="text-danger">{errorMessage}</small>}
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

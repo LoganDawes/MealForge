@@ -102,7 +102,7 @@ class UnregisterView(APIView):
             authenticated_user = authenticate(username=user.username, password=data["password"])
             if authenticated_user is None:
                 logger.error(f"Authentication failed for {user.username}")
-                return Response({"message": "User found, but authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "Incorrect Password"}, status=status.HTTP_400_BAD_REQUEST)
             
             # Blacklist the refresh token
             try:
