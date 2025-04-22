@@ -26,19 +26,29 @@ class RegisterUserView(APIView):
             logger.info(f"Received Data at api_gateway for register")
 
             # Send post request to Auth service
-            response = requests.post(f"{AUTH_SERVICE_URL}/api/register/", json=data, headers={"Content-Type": "application/json"}, timeout=10)
-            response.raise_for_status()
+            response = requests.post(
+                f"{AUTH_SERVICE_URL}/api/register/",
+                json=data,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
 
             # LOGGER : Test response data
-            logger.info(f"Response from Auth Service: {response.status_code} - {response.json().get('message')}")
+            logger.info(f"Response from Auth Service: {response.status_code} - {response.text}")
 
             # Return response from Auth service
             return Response(response.json(), status=response.status_code)
-        
+
         # Exception Handling
+        except requests.exceptions.HTTPError as e:
+            # Handle HTTP errors and forward the error response
+            logger.error(f"HTTPError: {e.response.status_code} - {e.response.text}")
+            return Response(e.response.json(), status=e.response.status_code)
+
         except ParseError:
             logger.error("Invalid JSON data received")
             return Response({"message": "Invalid JSON data"}, status=400)
+
         except requests.exceptions.RequestException as e:
             logger.error(f"RequestException: {str(e)}")
             return Response({"message": str(e)}, status=500)

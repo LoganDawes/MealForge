@@ -39,36 +39,32 @@ class RegisterView(APIView):
             logger.info(f"Sending data to user service for registering")
             response = requests.post(f"{USER_SERVICE_URL}/api/users/", json=data, timeout=10)
             logger.info(f"Response from user service: {response.status_code} - {response.text}")
-            response.raise_for_status()
 
-            # If user successfully created, authenticate user
-            if response.status_code == 201:
-                # Retrieve user
-                user = User.objects.filter(username=data["username"]).first()
-                if not user:
-                    logger.error(f"User {data['username']} not found for authentication")
-                    return Response({"message": "User created but not found"}, status=status.HTTP_404_NOT_FOUND)
-
-                # Authenticate user immediately
-                authenticated_user = authenticate(username=user.username, password=data["password"])
-                if authenticated_user is None:
-                    logger.error(f"Authentication failed for {user.username} after creation")
-                    return Response({"message": "User created, but authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
-                
-                # Generate JWT tokens
-                refresh = RefreshToken.for_user(authenticated_user)
-                access_token = str(refresh.access_token)
-
-                return Response({
-                    "message": "User authenticated successfully",
-                    "access_token": access_token,
-                    "refresh_token": str(refresh)
-                }, status=status.HTTP_201_CREATED)
-
-            # If user creation failed
-            else:
-                logger.error(f"User creation failed. Response from user service: {response.status_code} - {response.text}")
+            # If user creation failed, return the exact error messages
+            if response.status_code != 201:
                 return Response(response.json(), status=response.status_code)
+
+            # Retrieve user
+            user = User.objects.filter(username=data["username"]).first()
+            if not user:
+                logger.error(f"User {data['username']} not found for authentication")
+                return Response({"message": "User created but not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Authenticate user immediately
+            authenticated_user = authenticate(username=user.username, password=data["password"])
+            if authenticated_user is None:
+                logger.error(f"Authentication failed for {user.username} after creation")
+                return Response({"message": "User created, but authentication failed"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(authenticated_user)
+            access_token = str(refresh.access_token)
+
+            return Response({
+                "message": "User authenticated successfully",
+                "access_token": access_token,
+                "refresh_token": str(refresh)
+            }, status=status.HTTP_201_CREATED)
 
         # Exception Handling
         except ParseError:

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navigationbar from "../components/Navbar";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Card, Container } from "react-bootstrap";
+import { Form, Button, Card, Container, OverlayTrigger, Popover } from "react-bootstrap";
 import "./Color.css";
 import axios_api from "../utils/axiosInstance";
 
@@ -14,6 +14,7 @@ const Register = () => {
     confirmPassword: ""
   });
 
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,10 +26,18 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
     // Detect if the password and confirm password fields match
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setErrorMessage("Passwords do not match");
+      return;
+    }
+
+    // Validate password requirements
+    const passwordRegex = /^(?=.*\d).{8,}$/; // At least 8 characters and includes a number
+    if (!passwordRegex.test(formData.password)) {
+      setErrorMessage("Password must be at least 8 characters long and include a number");
       return;
     }
 
@@ -62,19 +71,51 @@ const Register = () => {
 
       if (error.response) {
         // Backend returned a response
-        console.error("Response data:", error.response.data);
-        console.error("Status code:", error.response.status);
-        alert(error.response.data.detail || "Registration failed");
+        const errorData = error.response.data;
+        if (errorData.username) {
+          setErrorMessage("Username is in use");
+
+        } else if (errorData.email) {
+          const emailError = errorData.email[0];
+          if (emailError.includes("Invalid email address")) {
+            setErrorMessage("Email is invalid");
+          } else if (emailError.includes("already in use")) {
+            setErrorMessage("Email is in use");
+          } else {
+            setErrorMessage("Email error: " + emailError);
+          }
+
+        } else {
+          setErrorMessage(errorData.detail || "Registration failed");
+        }
       } else if (error.request) {
         // Request was made but no response
-        console.error("No response received:", error.request);
-        alert("No response from server. Check API gateway address.");
+        setErrorMessage("No response from server.");
       } else {
         // Something else
-        console.error("Error setting up request:", error.message);
-        alert("An unexpected error occurred");
+        setErrorMessage("An unexpected error occurred");
       }
     }
+  };
+
+  // Render location of any errors
+  const renderErrorMessage = (field) => {
+    if (field === "username" && errorMessage === "Username is in use") {
+      return <small className="text-danger">{errorMessage}</small>;
+    }
+    if (field === "email" && (errorMessage === "Email is in use" || errorMessage === "Email is invalid")) {
+      return <small className="text-danger">{errorMessage}</small>;
+    }
+    if (field === "password" && errorMessage === "Password must be at least 8 characters long and include a number") {
+      return <small className="text-danger">{errorMessage}</small>;
+    }
+    if (field === "confirmPassword" && errorMessage === "Passwords do not match") {
+      return <small className="text-danger">{errorMessage}</small>;
+    }
+    if (field === "general" && !["Username is in use", "Email is in use", "Email is invalid", "Passwords do not match", "Password must be at least 8 characters long and include a number"].includes(errorMessage)) {
+      return <small className="text-danger d-block text-center mb-3">{errorMessage}</small>;
+    }
+    return null;
   };
 
   return (
@@ -87,6 +128,7 @@ const Register = () => {
             <Link to="/login">Already have an account</Link>
           </p>
           <Form onSubmit={handleRegister}>
+            {renderErrorMessage("general")}
             <Form.Group controlId="username" className="mb-3">
               <Form.Label>Username</Form.Label>
               <Form.Control
@@ -97,6 +139,7 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
+              {renderErrorMessage("username")}
             </Form.Group>
             <Form.Group controlId="email" className="mb-3">
               <Form.Label>Email</Form.Label>
@@ -108,17 +151,34 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
+              {renderErrorMessage("email")}
             </Form.Group>
             <Form.Group controlId="password" className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control
-                name="password"
-                type="password"
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <OverlayTrigger
+                trigger="focus"
+                placement="bottom"
+                overlay={
+                  <Popover id="password-requirements">
+                    <Popover.Body>
+                      <ul style={{ margin: 0, paddingLeft: "20px" }}>
+                        <li>Password must be 8+ characters</li>
+                        <li>Password must include a number</li>
+                      </ul>
+                    </Popover.Body>
+                  </Popover>
+                }
+              >
+                <Form.Control
+                  name="password"
+                  type="password"
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </OverlayTrigger>
+              {renderErrorMessage("password")}
             </Form.Group>
             <Form.Group controlId="confirmPassword" className="mb-4">
               <Form.Label>Confirm Password</Form.Label>
@@ -130,6 +190,7 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
+              {renderErrorMessage("confirmPassword")}
             </Form.Group>
             <Button variant="primary" type="submit" className="w-100">
               Sign up
