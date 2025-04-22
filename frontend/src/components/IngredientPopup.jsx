@@ -26,6 +26,8 @@ const IngredientPopup = ({ ingredient, onClose }) => {
 
   const imageUrl = ingredient.image ? `https://img.spoonacular.com/ingredients_100x100/${ingredient.image}` : '';
 
+  const isLoggedIn = !!localStorage.getItem("accessToken");
+
   // Function to save the ingredient
   const handleSaveIngredient = async () => {
     const token = localStorage.getItem("accessToken");
@@ -138,10 +140,12 @@ const IngredientPopup = ({ ingredient, onClose }) => {
           <div className="d-flex justify-content-between align-items-start">
             <h3>{capitalizeFirstLetter(ingredient.name)}</h3>
             <div className="d-flex align-items-center gap-2">
-              {isSaved ? (
-                <Button variant="danger" onClick={handleRemoveIngredient}>-</Button>
-              ) : (
-                <Button variant="success" onClick={handleSaveIngredient}>+</Button>
+              {isLoggedIn && (
+                isSaved ? (
+                  <Button variant="danger" onClick={handleRemoveIngredient}>-</Button>
+                ) : (
+                  <Button variant="success" onClick={handleSaveIngredient}>+</Button>
+                )
               )}
               <Button variant="outline-danger" onClick={onClose}>X</Button>
             </div>

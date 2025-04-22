@@ -50,6 +50,8 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [ingredientDetails, setIngredientDetails] = useState(null);
 
+  const isLoggedIn = !!localStorage.getItem("accessToken");
+
   // Fetch ingredient details when an ingredient is selected
   useEffect(() => {
     const fetchIngredientDetails = async () => {
@@ -239,10 +241,12 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
           <div className="popup-details" style={{ flex: 1, paddingLeft: "20px", display: "flex", flexDirection: "column" }}>
             {/* Save/Remove + Close Buttons */}
             <div className="d-flex justify-content-end gap-2 mb-3">
-              {isSaved ? (
-                <Button variant="danger" onClick={handleRemoveRecipe}>-</Button>
-              ) : (
-                <Button variant="success" onClick={handleSaveRecipe}>+</Button>
+              {isLoggedIn && (
+                isSaved ? (
+                  <Button variant="danger" onClick={handleRemoveRecipe}>-</Button>
+                ) : (
+                  <Button variant="success" onClick={handleSaveRecipe}>+</Button>
+                )
               )}
               <Button variant="outline-danger" onClick={onClose}>X</Button>
             </div>

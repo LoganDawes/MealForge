@@ -45,6 +45,8 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
 
     const totalFilters = selectedDiets.length + selectedIntolerances.length;
 
+    const isLoggedIn = !!localStorage.getItem("accessToken");
+
     return (
         <>
             <Navbar bg="light" expand="lg" className="mt-5">
@@ -57,13 +59,15 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
                         >
                             Search
                         </Nav.Link>
-                        <Nav.Link
-                            onClick={() => onTabChange("saved")}
-                            className={`px-3 ${activeTab === "saved" ? "active-tab" : ""}`}
-                            style={{ color: "black" }}
-                        >
-                            Saved
-                        </Nav.Link>
+                        {isLoggedIn && (
+                            <Nav.Link
+                                onClick={() => onTabChange("saved")}
+                                className={`px-3 ${activeTab === "saved" ? "active-tab" : ""}`}
+                                style={{ color: "black" }}
+                            >
+                                Saved
+                            </Nav.Link>
+                        )}
                     </Nav>
 
                     <h5 className="flex-grow-1 text-center m-0">{pageTitle}</h5>
