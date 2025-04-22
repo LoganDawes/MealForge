@@ -9,11 +9,14 @@ import axios_api from "../utils/axiosInstance";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+
     try {
       const res = await axios_api.post("/login/", {
         username: username,
@@ -34,8 +37,8 @@ const Login = () => {
 
     } catch (error) {
       console.error("Login Error:", error);
-      const msg = error.response?.data?.detail || "Login failed";
-      alert(msg);
+      const msg = error.response?.data?.message || "Login failed";
+      setErrorMessage(msg);
     }
   };
 
@@ -49,6 +52,9 @@ const Login = () => {
             <Link to="/register">Create an account</Link>
           </p>
           <Form onSubmit={handleLogin}>
+            {errorMessage && (
+              <small className="text-danger d-block text-center mb-3">{errorMessage}</small>
+            )}
             <Form.Group controlId="username" className="mb-3">
               <Form.Label>Username</Form.Label>
               <Form.Control
