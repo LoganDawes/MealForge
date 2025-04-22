@@ -1,6 +1,14 @@
+import requests
+
 from rest_framework import serializers
+from django.conf import settings
 from django.contrib.auth.models import User
 from .models import UserPreferences, UserCollections
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+
+HUNTER_API_KEY = settings.HUNTER_API_KEY
+HUNTER_API_URL = settings.HUNTER_API_URL
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,6 +17,33 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    def validate_email(self, value):
+        # Check if the email is already in use
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use. Please use a different email.")
+
+        # Validate email format
+        try:
+            validate_email(value)
+        except ValidationError:
+            raise serializers.ValidationError("Invalid email format.")
+        
+        try:
+            response = requests.get(
+                f"{HUNTER_API_URL}",
+                params={"email": value, "api_key": HUNTER_API_KEY},
+                timeout=10
+            )
+            response_data = response.json()
+
+            # Check if the email is valid
+            if response.status_code != 200 or response_data.get("data", {}).get("status") != "valid":
+                raise serializers.ValidationError("Invalid email address. Please provide a valid email.")
+        except requests.exceptions.RequestException as e:
+            raise serializers.ValidationError(f"Error validating email: {str(e)}")
+
+        return value
 
     def create(self, validated_data):
         user = User.objects.create_user(

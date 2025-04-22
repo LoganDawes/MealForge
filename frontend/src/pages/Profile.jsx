@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Navigationbar from "../components/Navbar";
-import { Form, Card, Container, Button, Dropdown } from "react-bootstrap";
+import { Modal, Form, Card, Container, Button, Dropdown } from "react-bootstrap";
 import "./Color.css";
 import axios_api from "../utils/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const dietOptions = [
   "Gluten Free", "Ketogenic", "Vegetarian", "Lacto-vegetarian", "Ovo-vegetarian",
@@ -59,6 +60,9 @@ const Profile = () => {
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedIntolerances, setSelectedIntolerances] = useState([]);
   const [calorieLimit, setCalorieLimit] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   // Fetch preferences when component mounts
   useEffect(() => {
@@ -115,6 +119,41 @@ const Profile = () => {
     alert("Preferences saved!");
   };
 
+  // Handle account deletion
+  const handleDeleteAccount = async () => {
+    const username = localStorage.getItem("username");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (!username || !refreshToken) {
+      alert("Missing account information. Please log in again.");
+      return;
+    }
+
+    try {
+      const response = await axios_api.post("/unregister/", {
+        username,
+        password,
+        refresh_token: refreshToken,
+      });
+      console.log("Account deleted:", response.data);
+      localStorage.removeItem("accessToken");
+      navigate("/"); // Redirect to home page
+      navigate(0); // Refresh the page
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Failed to delete account. Please try again.");
+    }
+  };
+
+  // Handle delete account modal
+  const handleShowDeleteModal = () => setShowDeleteModal(true);
+  const handleCloseDeleteModal = () => setShowDeleteModal(false);
+
+  const handleConfirmDelete = () => {
+    handleDeleteAccount();
+    setShowDeleteModal(false);
+  };
+
   return (
     <>
       <Navigationbar />
@@ -155,8 +194,39 @@ const Profile = () => {
           <Button variant="primary" className="w-100 mt-3" onClick={handleSavePreferences}>
             Save Preferences
           </Button>
+
+          <Button variant="danger" className="w-100 mt-3" onClick={handleShowDeleteModal}>
+            Delete Account
+          </Button>
         </Card>
       </Container>
+
+      {/* Delete Account Modal */}
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Account Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>To delete your account, please enter your password:</p>
+          <Form.Group controlId="password">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseDeleteModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>
+            Delete Account
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
