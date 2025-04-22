@@ -3,7 +3,7 @@ import Navigationbar from '../components/Navbar';
 import SubNavbar from "../components/SubNavbar";
 import IngredientCard from '../components/IngredientCard';
 import IngredientPopup from "../components/IngredientPopup";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Color.css";
 import axios_api from "../utils/axiosInstance";
@@ -13,6 +13,7 @@ function Ingredients() {
   const [ingredients, setIngredients] = useState([]); // State to store ingredient search results
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
+  const [offset, setOffset] = useState(0);
 
   // Function to handle search
   const handleSearch = async (
@@ -20,7 +21,8 @@ function Ingredients() {
     selectedDiets,
     selectedIntolerances = [],
     sortOption = "",
-    sortDirection = ""
+    sortDirection = "",
+    newOffset = 0
   ) => {
     if (activeTab !== "search") return;
     setLoading(true);
@@ -30,7 +32,9 @@ function Ingredients() {
           query: searchText,
           intolerances: selectedIntolerances.join(","),
           sort: sortOption,
-          sortDirection: sortDirection
+          sortDirection: sortDirection,
+          number: 12,
+          offset: newOffset,
         }
       });
 
@@ -47,7 +51,11 @@ function Ingredients() {
       const fullIngredients = await Promise.all(ingredientDetailsPromises);
 
       // Update state with the full ingredient data
-      setIngredients(fullIngredients);
+      if (newOffset === 0) {
+        setIngredients(fullIngredients);
+      } else {
+        setIngredients((prevIngredients) => [...prevIngredients, ...fullIngredients]); // Append to the list
+      }
     } catch (error) {
       console.error("Error fetching ingredients:", error);
     }
@@ -76,6 +84,7 @@ function Ingredients() {
   // Handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setOffset(0);
   };
 
   // Fetch ingredients when activeTab changes
@@ -86,6 +95,13 @@ function Ingredients() {
       fetchSavedIngredients();
     }
   }, [activeTab]);
+
+  // See more results
+  const handleSeeMore = () => {
+    const newOffset = offset + 12;
+    setOffset(newOffset);
+    handleSearch("", [], [], "", "", newOffset);
+  };
 
   return (
     <div className="Ingredients">
@@ -99,16 +115,23 @@ function Ingredients() {
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
         <Row>
-          {loading ? (
-            <div>Loading...</div>
-          ) : (
-            ingredients.map((ingredient, index) => (
-              <Col key={index} xs={12} sm={6} md={4} lg={2} xl={2}>
-                <IngredientCard {...ingredient} onClick={() => setSelectedIngredient(ingredient)} />
-              </Col>
-            ))
-          )}
+          {ingredients.map((ingredient, index) => (
+            <Col key={index} xs={12} sm={6} md={4} lg={2} xl={2}>
+              <IngredientCard {...ingredient} onClick={() => setSelectedIngredient(ingredient)} />
+            </Col>
+          ))}
         </Row>
+        {activeTab === "search" && (
+          <div className="d-flex justify-content-center mt-4">
+            {loading ? (
+              <div>Loading...</div> // Show Loading... in place of the button
+            ) : (
+              <Button variant="primary" onClick={handleSeeMore}>
+                See more results
+              </Button>
+            )}
+          </div>
+        )}
       </Container>
 
       {selectedIngredient && (

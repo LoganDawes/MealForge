@@ -3,7 +3,7 @@ import Navigationbar from '../components/Navbar';
 import SubNavbar from "../components/SubNavbar";
 import RecipeCard from '../components/RecipeCard';
 import RecipePopup from "../components/RecipePopup";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Color.css";
 import axios_api from "../utils/axiosInstance";
@@ -14,6 +14,7 @@ function Recipes() {
   const [recipes, setRecipes] = useState([]); // State to store recipe search results
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
+  const [offset, setOffset] = useState(0);
 
   // Function to fetch user ingredients
   const fetchUserIngredients = async () => {
@@ -36,7 +37,8 @@ function Recipes() {
     selectedDiets = [],
     selectedIntolerances = [],
     sortOption = "",
-    sortDirection = ""
+    sortDirection = "",
+    newOffset = 0,
   ) => {
     setLoading(true);
 
@@ -58,10 +60,16 @@ function Recipes() {
           includeIngredients: includeIngredients,
           fillIngredients: true,
           addRecipeNutrition: true,
-          addRecipeInstructions: true
+          addRecipeInstructions: true,
+          number: 12,
+          offset: newOffset,
         }
       });
-      setRecipes(response.data.results); // Update the state with the search results
+      if (newOffset === 0) {
+        setRecipes(response.data.results);
+      } else {
+        setRecipes((prevRecipes) => [...prevRecipes, ...response.data.results]); // Append to the list
+      }
     } catch (error) {
       console.error("Error fetching recipes:", error);
     }
@@ -90,6 +98,7 @@ function Recipes() {
   // Handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setOffset(0);
   };
 
   // Fetch recipes when activeTab changes
@@ -100,6 +109,13 @@ function Recipes() {
       fetchSavedRecipes();
     }
   }, [activeTab]);
+
+  // See more results
+  const handleSeeMore = () => {
+    const newOffset = offset + 12;
+    setOffset(newOffset);
+    handleSearch("", selectedDiets, [], "", "", newOffset);
+  };
 
   return (
     <div className="Recipes">
@@ -114,19 +130,28 @@ function Recipes() {
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
         <Row>
-          {loading ? (
-            <div>Loading...</div>
-          ) : (
-            recipes.map((recipe, index) => (
-              <Col key={index} xs={12} md={6} lg={4}>
-                <RecipeCard {...recipe}
-                  usedIngredients={recipe.usedIngredients}
-                  selectedDiets={selectedDiets}
-                  onClick={() => setSelectedRecipe(recipe)} />
-              </Col>
-            ))
-          )}
+          {recipes.map((recipe, index) => (
+            <Col key={index} xs={12} md={6} lg={4}>
+              <RecipeCard
+                {...recipe}
+                usedIngredients={recipe.usedIngredients}
+                selectedDiets={selectedDiets}
+                onClick={() => setSelectedRecipe(recipe)}
+              />
+            </Col>
+          ))}
         </Row>
+        {activeTab === "search" && (
+          <div className="d-flex justify-content-center mt-4">
+            {loading ? (
+              <div>Loading...</div>
+            ) : (
+              <Button variant="primary" onClick={handleSeeMore}>
+                See more results
+              </Button>
+            )}
+          </div>
+        )}
       </Container>
 
       {selectedRecipe && (
