@@ -20,7 +20,11 @@ const Navigationbar = () => {
         </Nav>
 
         <Nav>
-          {isLoggedIn && <Nav.Link as={Link} to="/profile" style={{ color: "white" }}>{username}</Nav.Link>}
+          {isLoggedIn ? (
+            <Nav.Link as={Link} to="/profile" style={{ color: "white" }}>{username}</Nav.Link>
+          ) : (
+            <Nav.Link as={Link} to="/login" style={{ color: "white" }}>Log In</Nav.Link>
+          )}
           <NavDropdown title={<span className="bi bi-person-circle" style={{ color: "white" }}></span>} id="profile-dropdown" align="end">
             {isLoggedIn ? (
               <>
