@@ -85,6 +85,8 @@ function Ingredients() {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setOffset(0);
+    setIngredients([]);
+    setLoading(true);
   };
 
   // Fetch ingredients when activeTab changes
@@ -114,23 +116,45 @@ function Ingredients() {
       />
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
-        <Row>
-          {ingredients.map((ingredient, index) => (
-            <Col key={index} xs={12} sm={6} md={4} lg={2} xl={2}>
-              <IngredientCard {...ingredient} onClick={() => setSelectedIngredient(ingredient)} />
-            </Col>
-          ))}
-        </Row>
-        {activeTab === "search" && (
-          <div className="d-flex justify-content-center mt-4">
-            {loading ? (
-              <div>Loading...</div> // Show Loading... in place of the button
-            ) : (
-              <Button variant="primary" onClick={handleSeeMore}>
-                See more results
-              </Button>
-            )}
-          </div>
+        {activeTab === "saved" ? (
+          loading ? (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: "100%" }}>
+              <p className="text-center text-muted">Loading...</p>
+            </div>
+          ) : ingredients.length === 0 ? (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: "100%" }}>
+              <p className="text-center text-muted">
+                No saved ingredients yet! Press <strong>+</strong> on an ingredient to save it here.
+              </p>
+            </div>
+          ) : (
+            <Row>
+              {ingredients.map((ingredient, index) => (
+                <Col key={index} xs={12} sm={6} md={4} lg={2} xl={2}>
+                  <IngredientCard {...ingredient} onClick={() => setSelectedIngredient(ingredient)} />
+                </Col>
+              ))}
+            </Row>
+          )
+        ) : (
+          <>
+            <Row>
+              {ingredients.map((ingredient, index) => (
+                <Col key={index} xs={12} sm={6} md={4} lg={2} xl={2}>
+                  <IngredientCard {...ingredient} onClick={() => setSelectedIngredient(ingredient)} />
+                </Col>
+              ))}
+            </Row>
+            <div className="d-flex justify-content-center mt-4">
+              {loading ? (
+                <div>Loading...</div> // Show Loading... in place of the button
+              ) : (
+                <Button variant="primary" onClick={handleSeeMore}>
+                  See more results
+                </Button>
+              )}
+            </div>
+          </>
         )}
       </Container>
 
