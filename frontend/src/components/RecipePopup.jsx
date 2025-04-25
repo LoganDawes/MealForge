@@ -34,7 +34,7 @@ const normalizeDiet = (diet) => {
   return dietMapping[diet.toLowerCase()] || diet; // Default to original if no match
 };
 
-const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = [] }) => {
+const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngredients = [] }) => {
   const {
     id,
     image,
@@ -111,6 +111,13 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
       );
       alert("Recipe saved successfully!");
       setIsSaved(true);
+
+      setRecipes((prevRecipes) => {
+        if (prevRecipes.some((savedRecipe) => savedRecipe.id === recipe.id)) {
+          return prevRecipes;
+        }
+        return [...prevRecipes, recipe];
+      });
     } catch (error) {
       console.error("Error saving recipe:", error);
       alert("Failed to save the recipe. Please try again.");
@@ -137,6 +144,10 @@ const RecipePopup = ({ recipe, onClose, selectedDiets = [], usedIngredients = []
       );
       alert("Recipe removed successfully!");
       setIsSaved(false);
+
+      setRecipes((prevRecipes) =>
+        prevRecipes.filter((savedRecipe) => savedRecipe.id !== recipe.id)
+      );
     } catch (error) {
       console.error("Error removing recipe:", error);
       alert("Failed to remove the recipe. Please try again.");

@@ -187,8 +187,9 @@ function Recipes() {
         <RecipePopup
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
+          setRecipes={setRecipes}
           selectedDiets={selectedDiets} // Pass selected diets
-          usedIngredients={selectedRecipe.usedIngredients || []} // Pass used ingredients
+          usedIngredients={selectedRecipe.usedIngredients || []}
         />
       )}
     </div>

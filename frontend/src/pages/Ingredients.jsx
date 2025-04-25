@@ -159,7 +159,11 @@ function Ingredients() {
       </Container>
 
       {selectedIngredient && (
-        <IngredientPopup ingredient={selectedIngredient} onClose={() => setSelectedIngredient(null)} />
+        <IngredientPopup
+        ingredient={selectedIngredient}
+        onClose={() => setSelectedIngredient(null)}
+        setIngredients={setIngredients}
+      />
       )}
     </div>
   );

@@ -18,7 +18,7 @@ const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const IngredientPopup = ({ ingredient, onClose }) => {
+const IngredientPopup = ({ ingredient, onClose, setIngredients }) => {
   const [amount, setAmount] = useState(ingredient.amount || 10);
   const [unit, setUnit] = useState(ingredient.unit || "g");
   const [nutrition, setNutrition] = useState(ingredient.nutrition || { nutrients: [] });
@@ -48,6 +48,13 @@ const IngredientPopup = ({ ingredient, onClose }) => {
       );
       alert("Ingredient saved successfully!");
       setIsSaved(true); // Update state to reflect the ingredient is saved
+
+      setIngredients((prevIngredients) => {
+        if (prevIngredients.some((savedIngredient) => savedIngredient.id === ingredient.id)) {
+          return prevIngredients;
+        }
+        return [...prevIngredients, ingredient];
+      });
     } catch (error) {
       console.error("Error saving ingredient:", error);
       alert("Failed to save the ingredient. Please try again.");
@@ -74,6 +81,10 @@ const IngredientPopup = ({ ingredient, onClose }) => {
       );
       alert("Ingredient removed successfully!");
       setIsSaved(false); // Update state to reflect the ingredient is no longer saved
+
+      setIngredients((prevIngredients) =>
+        prevIngredients.filter((savedIngredient) => savedIngredient.id !== ingredient.id)
+      );
     } catch (error) {
       console.error("Error removing ingredient:", error);
       alert("Failed to remove the ingredient. Please try again.");
