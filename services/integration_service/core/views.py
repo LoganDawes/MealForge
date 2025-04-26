@@ -150,17 +150,19 @@ class SearchRecipesView(APIView):
             cache_key = f"search_recipes_{hash(frozenset(params.items()))}"
 
             # Check if response is cached
-            cached_response = cache.get(cache_key)
-            if cached_response:
-                logger.info("Returning cached response")
-                return Response(cached_response, status=status.HTTP_200_OK)
+            if params.get("sort") != "random":
+                cached_response = cache.get(cache_key)
+                if cached_response:
+                    logger.info("Returning cached response")
+                    return Response(cached_response, status=status.HTTP_200_OK)
 
             # Send get request to Spoonacular
             response = requests.get(url, params=params, headers= {"Content-Type": "application/json"}, timeout=10)
             response.raise_for_status()
 
             # Cache the response
-            cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
+            if params.get("sort") != "random":
+                cache.set(cache_key, response.json(), timeout=settings.SPOONACULAR_CACHE_TIMEOUT)
 
             # LOGGER: Test response data
             logger.info(f"Response from Spoonacular: {response.status_code} - {response.json().get('totalResults')} results")
