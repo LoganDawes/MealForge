@@ -45,6 +45,13 @@ axios_api.interceptors.response.use(
         return axios_api(originalRequest); // Retry original request
       } catch (refreshError) {
         console.error("Refresh token failed:", refreshError);
+
+        // Clear tokens and navigate to login page
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        
+        alert("Session expired. Please log in again.");
+
         return Promise.reject(refreshError);
       }
     }
