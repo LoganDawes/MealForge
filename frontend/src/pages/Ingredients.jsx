@@ -56,20 +56,18 @@ function Ingredients() {
           offset: newOffset,
         }
       });
-      /* DEBUG: UNCOMMENT
-            // Fetch detailed data for each ingredient by its ID
-            const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
-              const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, {
-                params: { amount: 10, unit: "g" },
-                noAuth: true
-              });
-              return ingredientResponse.data; // Return the detailed ingredient data
-            });
-      
-            // Wait for all API calls to complete
-            const fullIngredients = await Promise.all(ingredientDetailsPromises);
-      */
-      const fullIngredients = response.data.results //DEBUG: REMOVE
+
+      // Fetch detailed data for each ingredient by its ID
+      const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
+        const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, {
+          params: { amount: 10, unit: "g" },
+          noAuth: true
+        });
+        return ingredientResponse.data; // Return the detailed ingredient data
+      });
+
+      // Wait for all API calls to complete
+      const fullIngredients = await Promise.all(ingredientDetailsPromises);
 
       // Update state with the full ingredient data
       if (newOffset === 0) {
@@ -114,9 +112,9 @@ function Ingredients() {
     setSelectedIntolerances(intolerances || []);
 
     console.log("Updated filters:", {
-        intolerances,
+      intolerances,
     });
-};
+  };
 
   useEffect(() => {
     if (activeTab === "saved") {

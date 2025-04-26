@@ -100,7 +100,28 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
                 .finally(() => {
                     setLoading(false);
                 });
+        } else {
+            // If not logged in, set default values
+            setSelectedDiets([]);
+            setSelectedIntolerances([]);
+            setCalorieLimit(null);
+
+            // Notify parent about the default filter values
+            if (pageTitle === "Recipes") {
+                onFilterChange({
+                    diets: [],
+                    intolerances: [],
+                    calorie_limit: null,
+                });
+            } else if (pageTitle === "Ingredients") {
+                onFilterChange({
+                    intolerances: [],
+                });
+            }
+
+            setPreferencesLoaded(true);
         }
+
     }, []); // Empty dependency array ensures this runs only once
     
     // Trigger search when preferences are updated
@@ -112,10 +133,7 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
                     handleSearch();
                 }
             } else {
-                // Trigger search only if no preferences exist
-                if (selectedDiets.length === 0 && selectedIntolerances.length === 0 && calorieLimit === null) {
-                    handleSearch();
-                }
+                handleSearch();
             }
         }
     }, [preferencesLoaded, activeTab]); // Add activeTab as a dependency
