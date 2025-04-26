@@ -10,13 +10,17 @@ import axios_api from "../utils/axiosInstance";
 
 function Recipes() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [query, setQuery] = useState(""); // State to store the search query
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedIntolerances, setSelectedIntolerances] = useState([]); // State to store selected intolerances
+  const [sortOption, setSortOption] = useState(""); // State to store selected sort option
+  const [sortDirection, setSortDirection] = useState(""); // State to store selected sort direction
   const [calorieLimit, setCalorieLimit] = useState(9999); // Default calorie limit
   const [recipes, setRecipes] = useState([]); // State to store recipe search results
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
   const [offset, setOffset] = useState(0);
+  const [noMoreResultsMessage, setNoMoreResultsMessage] = useState(""); // State to store "No more results" message
 
   // Function to fetch user ingredients
   const fetchUserIngredients = async () => {
@@ -29,17 +33,15 @@ function Recipes() {
     }
   };
 
-  const handleFilterChange = ({ diets, intolerances, calorie_limit }) => {
+  const handleFilterChange = ({ query, diets, intolerances, sortOption, sortDirection, calorie_limit }) => {
+    setQuery(query || "");
     setSelectedDiets(diets || []);
     setSelectedIntolerances(intolerances || []);
+    setSortOption(sortOption || "");
+    setSortDirection(sortDirection || "");
     setCalorieLimit(calorie_limit || null);
-
-    console.log("Updated filters:", {
-        diets,
-        intolerances,
-        calorie_limit,
-    });
-};
+    setOffset(0);
+  };
 
   // Function to handle search
   const handleSearch = async (
@@ -100,6 +102,16 @@ function Recipes() {
       } else {
         setRecipes((prevRecipes) => [...prevRecipes, ...response.data.results]); // Append to the list
       }
+
+      // Handle "No more results" and "No results found" cases
+      if (response.data.totalResults === 0) {
+        setNoMoreResultsMessage("No results found for this query");
+      } else if (response.data.results.length < 12) {
+        setNoMoreResultsMessage("No more results");
+      } else {
+        setNoMoreResultsMessage(""); // Reset message if there are more results
+      }
+
     } catch (error) {
       console.error("Error fetching recipes:", error);
     }
@@ -143,7 +155,7 @@ function Recipes() {
   const handleSeeMore = () => {
     const newOffset = offset + 12;
     setOffset(newOffset);
-    handleSearch("", selectedDiets, selectedIntolerances, "", "", calorieLimit, newOffset);
+    handleSearch(query, selectedDiets, selectedIntolerances, sortOption, sortDirection, calorieLimit, newOffset);
   };
 
   return (
@@ -201,6 +213,8 @@ function Recipes() {
             <div className="d-flex justify-content-center mt-4">
               {loading ? (
                 <div>Loading...</div> // Show Loading... in place of the button
+              ) : noMoreResultsMessage ? (
+                <div>{noMoreResultsMessage}</div> // Show the message
               ) : (
                 <Button variant="primary" onClick={handleSeeMore}>
                   See more results

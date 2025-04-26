@@ -141,13 +141,19 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
     const handleSearch = () => {
         if (pageTitle === "Recipes") {
             onFilterChange({
+                query: searchText,
                 diets: selectedDiets,
                 intolerances: selectedIntolerances,
+                sort: sortOption,
+                sortDirection: sortDirection,
                 calorie_limit: calorieLimit,
             });
         } else if (pageTitle === "Ingredients") {
             onFilterChange({
+                query: searchText,
                 intolerances: selectedIntolerances,
+                sortOption: sortOption,
+                sortDirection: sortDirection,
             });
         }
 
