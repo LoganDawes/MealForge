@@ -11,6 +11,8 @@ import axios_api from "../utils/axiosInstance";
 function Recipes() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedDiets, setSelectedDiets] = useState([]);
+  const [selectedIntolerances, setSelectedIntolerances] = useState([]); // State to store selected intolerances
+  const [calorieLimit, setCalorieLimit] = useState(9999); // Default calorie limit
   const [recipes, setRecipes] = useState([]); // State to store recipe search results
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
@@ -27,9 +29,17 @@ function Recipes() {
     }
   };
 
-  const handleFilterChange = (updatedDiets) => {
-    setSelectedDiets(updatedDiets); // Update selected diets
-  };
+  const handleFilterChange = ({ diets, intolerances, calorie_limit }) => {
+    setSelectedDiets(diets || []);
+    setSelectedIntolerances(intolerances || []);
+    setCalorieLimit(calorie_limit || null);
+
+    console.log("Updated filters:", {
+        diets,
+        intolerances,
+        calorie_limit,
+    });
+};
 
   // Function to handle search
   const handleSearch = async (
@@ -38,9 +48,18 @@ function Recipes() {
     selectedIntolerances = [],
     sortOption = "",
     sortDirection = "",
+    calorieLimit = 9999,
     newOffset = 0,
   ) => {
-    setLoading(true);
+
+    console.log("Page - Diets:", selectedDiets);
+    console.log("Page - Intolerances:", selectedIntolerances);
+    if (newOffset === 0) {
+      setRecipes([]);
+      setLoading(true);
+    } else {
+      setLoading(true);
+    }
 
     let includeIngredients = [];
 
@@ -50,6 +69,16 @@ function Recipes() {
     }
 
     try {
+      console.log("Query Params:", {
+        query: searchText,
+        diet: selectedDiets.join(","),
+        intolerances: selectedIntolerances.join(","),
+        sort: sortOption,
+        sortDirection: sortDirection,
+        calorieLimit: calorieLimit,
+        number: 12,
+        offset: newOffset,
+      });
       const response = await axios_api.get(`/search/recipes`, {
         params: {
           query: searchText,
@@ -57,6 +86,7 @@ function Recipes() {
           intolerances: selectedIntolerances.join(","),
           sort: sortOption,
           sortDirection: sortDirection,
+          maxCalories: calorieLimit,
           includeIngredients: includeIngredients,
           fillIngredients: true,
           addRecipeNutrition: true,
@@ -103,11 +133,8 @@ function Recipes() {
     setLoading(true);
   };
 
-  // Fetch recipes when activeTab changes
   useEffect(() => {
-    if (activeTab === "search") {
-      handleSearch(""); // Trigger search with an empty term
-    } else if (activeTab === "saved") {
+    if (activeTab === "saved") {
       fetchSavedRecipes();
     }
   }, [activeTab]);
@@ -116,7 +143,7 @@ function Recipes() {
   const handleSeeMore = () => {
     const newOffset = offset + 12;
     setOffset(newOffset);
-    handleSearch("", selectedDiets, [], "", "", newOffset);
+    handleSearch("", selectedDiets, selectedIntolerances, "", "", calorieLimit, newOffset);
   };
 
   return (
@@ -128,6 +155,7 @@ function Recipes() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         onFilterChange={handleFilterChange}
+        setLoading={setLoading}
       />
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>

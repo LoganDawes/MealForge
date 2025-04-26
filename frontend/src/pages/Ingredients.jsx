@@ -10,6 +10,7 @@ import axios_api from "../utils/axiosInstance";
 
 function Ingredients() {
   const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [selectedIntolerances, setSelectedIntolerances] = useState([]); // State to store selected intolerances
   const [ingredients, setIngredients] = useState([]); // State to store ingredient search results
   const [loading, setLoading] = useState(false); // Loading state for search results
   const [activeTab, setActiveTab] = useState("search");
@@ -22,10 +23,28 @@ function Ingredients() {
     selectedIntolerances = [],
     sortOption = "",
     sortDirection = "",
+    calorieLimit,
     newOffset = 0
   ) => {
+
+    console.log("Page - Intolerances:", selectedIntolerances);
     if (activeTab !== "search") return;
-    setLoading(true);
+
+    if (newOffset === 0) {
+      setIngredients([]);
+      setLoading(true);
+    } else {
+      setLoading(true);
+    }
+
+    console.log("Query Params:", {
+      query: searchText,
+      intolerances: selectedIntolerances.join(","),
+      sort: sortOption,
+      sortDirection: sortDirection,
+      number: 12,
+      offset: newOffset,
+    });
     try {
       const response = await axios_api.get(`/search/ingredients`, {
         params: {
@@ -37,18 +56,20 @@ function Ingredients() {
           offset: newOffset,
         }
       });
-
-      // Fetch detailed data for each ingredient by its ID
-      const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
-        const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, {
-          params: { amount: 10, unit: "g" },
-          noAuth: true
-        });
-        return ingredientResponse.data; // Return the detailed ingredient data
-      });
-
-      // Wait for all API calls to complete
-      const fullIngredients = await Promise.all(ingredientDetailsPromises);
+      /* DEBUG: UNCOMMENT
+            // Fetch detailed data for each ingredient by its ID
+            const ingredientDetailsPromises = response.data.results.map(async (ingredient) => {
+              const ingredientResponse = await axios_api.get(`/ingredients/${ingredient.id}`, {
+                params: { amount: 10, unit: "g" },
+                noAuth: true
+              });
+              return ingredientResponse.data; // Return the detailed ingredient data
+            });
+      
+            // Wait for all API calls to complete
+            const fullIngredients = await Promise.all(ingredientDetailsPromises);
+      */
+      const fullIngredients = response.data.results //DEBUG: REMOVE
 
       // Update state with the full ingredient data
       if (newOffset === 0) {
@@ -89,11 +110,16 @@ function Ingredients() {
     setLoading(true);
   };
 
-  // Fetch ingredients when activeTab changes
+  const handleFilterChange = ({ intolerances }) => {
+    setSelectedIntolerances(intolerances || []);
+
+    console.log("Updated filters:", {
+        intolerances,
+    });
+};
+
   useEffect(() => {
-    if (activeTab === "search") {
-      handleSearch(""); // Trigger search with an empty term
-    } else if (activeTab === "saved") {
+    if (activeTab === "saved") {
       fetchSavedIngredients();
     }
   }, [activeTab]);
@@ -102,7 +128,7 @@ function Ingredients() {
   const handleSeeMore = () => {
     const newOffset = offset + 12;
     setOffset(newOffset);
-    handleSearch("", [], [], "", "", newOffset);
+    handleSearch("", [], selectedIntolerances, "", "", "", newOffset);
   };
 
   return (
@@ -113,6 +139,8 @@ function Ingredients() {
         onSearch={handleSearch}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        onFilterChange={handleFilterChange}
+        setLoading={setLoading}
       />
 
       <Container fluid className="pt-4" style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }}>
@@ -160,10 +188,10 @@ function Ingredients() {
 
       {selectedIngredient && (
         <IngredientPopup
-        ingredient={selectedIngredient}
-        onClose={() => setSelectedIngredient(null)}
-        setIngredients={setIngredients}
-      />
+          ingredient={selectedIngredient}
+          onClose={() => setSelectedIngredient(null)}
+          setIngredients={setIngredients}
+        />
       )}
     </div>
   );

@@ -107,6 +107,9 @@ class IngredientInformationView(APIView):
 class SearchRecipesView(APIView):
     def get(self, request):
         try:
+            # DEBUG
+            logger.info(f"Received Query Params: {request.query_params}")
+            
             # Construct API request URL
             url = f"{SPOONACULAR_BASE_URL}/recipes/complexSearch"
             params = {
@@ -142,7 +145,7 @@ class SearchRecipesView(APIView):
                 value = request.query_params.get(param)
                 if value is not None:
                     params[param] = value
-
+                    
             # Generate cache key based on query parameters
             cache_key = f"search_recipes_{hash(frozenset(params.items()))}"
 
@@ -174,6 +177,9 @@ class SearchRecipesView(APIView):
 class SearchIngredientsView(APIView):
     def get(self, request):
         try:
+            # DEBUG
+            logger.info(f"Received Query Params: {request.query_params}")
+            
             # Construct API request URL
             url = f"{SPOONACULAR_BASE_URL}/food/ingredients/search"
             params = {
@@ -196,7 +202,7 @@ class SearchIngredientsView(APIView):
             # Set default query to 'a' if empty (required parameter)
             if 'query' not in params or not params['query']:
                 params['query'] = 'a'
-
+                
             # Generate cache key based on query parameters
             cache_key = f"search_ingredients_{hash(frozenset(params.items()))}"
 

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navbar, Button, Form, InputGroup, Nav, Container, Dropdown, Row, Col } from "react-bootstrap";
+import axios_api from "../utils/axiosInstance";
 import "./Color.css";
 
 const DIET_CHOICES = [
@@ -9,7 +10,7 @@ const DIET_CHOICES = [
 
 const INTOLERANCE_CHOICES = [
     "Dairy", "Egg", "Gluten", "Grain", "Peanut", "Seafood", "Sesame",
-    "Shellfish", "Soy", "Sulfite", "Tree Nut", "Wheat"
+    "Shellfish", "Soy", "Sulfite", "Tree nut", "Wheat"
 ];
 
 const SORT_OPTIONS = [
@@ -18,17 +19,124 @@ const SORT_OPTIONS = [
     "cholesterol", "total-fat", "trans-fat", "saturated-fat", "fiber", "protein", "sugar"
 ];
 
-const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange }) => {
+const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange, setLoading }) => {
     const [searchText, setSearchText] = useState("");
     const [selectedDiets, setSelectedDiets] = useState([]);
     const [selectedIntolerances, setSelectedIntolerances] = useState([]);
+    const [calorieLimit, setCalorieLimit] = useState(null);
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [sortOption, setSortOption] = useState("");
     const [sortDirection, setSortDirection] = useState("desc");
+    const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+
+    const isLoggedIn = !!localStorage.getItem("accessToken");
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            setLoading(true);
+            axios_api
+                .get("/preferences", {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                    },
+                })
+                .then((response) => {
+                    const { diets, intolerances, calorie_limit } = response.data;
+    
+                    // Set state with fallback values
+                    const fetchedDiets = diets || [];
+                    const fetchedIntolerances = intolerances || [];
+                    const fetchedCalorieLimit = calorie_limit || null;
+    
+                    setSelectedDiets(fetchedDiets);
+                    setSelectedIntolerances(fetchedIntolerances);
+                    setCalorieLimit(fetchedCalorieLimit);
+    
+                    console.log("Preferences fetched:", {
+                        diets: fetchedDiets,
+                        intolerances: fetchedIntolerances,
+                        calorie_limit: fetchedCalorieLimit,
+                    });
+
+                    // Notify parent about the initial filter values
+                    if (pageTitle === "Recipes") {
+                        onFilterChange({
+                            diets: fetchedDiets,
+                            intolerances: fetchedIntolerances,
+                            calorie_limit: fetchedCalorieLimit,
+                        });
+                    } else if (pageTitle === "Ingredients") {
+                        onFilterChange({
+                            intolerances: fetchedIntolerances,
+                        });
+                    }
+
+                    setPreferencesLoaded(true);
+                })
+                .catch((error) => {
+                    console.error("Error fetching preferences:", error);
+    
+                    // Set default values in case of an error
+                    setSelectedDiets([]);
+                    setSelectedIntolerances([]);
+                    setCalorieLimit(null);
+    
+                    // Notify parent about the default filter values
+                    if (pageTitle === "Recipes") {
+                        onFilterChange({
+                            diets: [],
+                            intolerances: [],
+                            calorie_limit: null,
+                        });
+                    } else if (pageTitle === "Ingredients") {
+                        onFilterChange({
+                            intolerances: [],
+                        });
+                    }
+
+                    setPreferencesLoaded(true);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+    }, []); // Empty dependency array ensures this runs only once
+    
+    // Trigger search when preferences are updated
+    useEffect(() => {
+        if (preferencesLoaded && activeTab === "search") {
+            if (isLoggedIn) {
+                // Only trigger search if preferences are fully loaded
+                if (selectedDiets.length > 0 || selectedIntolerances.length > 0 || calorieLimit !== null) {
+                    handleSearch();
+                }
+            } else {
+                // Trigger search only if no preferences exist
+                if (selectedDiets.length === 0 && selectedIntolerances.length === 0 && calorieLimit === null) {
+                    handleSearch();
+                }
+            }
+        }
+    }, [preferencesLoaded, activeTab]); // Add activeTab as a dependency
 
     const handleSearch = () => {
-        onSearch(searchText, selectedDiets, selectedIntolerances, sortOption, sortDirection);
+        if (pageTitle === "Recipes") {
+            onFilterChange({
+                diets: selectedDiets,
+                intolerances: selectedIntolerances,
+                calorie_limit: calorieLimit,
+            });
+        } else if (pageTitle === "Ingredients") {
+            onFilterChange({
+                intolerances: selectedIntolerances,
+            });
+        }
+
+        console.log("SubNavbar - Diets:", selectedDiets);
+        console.log("SubNavbar - Intolerances:", selectedIntolerances);
+        console.log("SubNavbar - Calorie Limit:", calorieLimit);
+        onSearch(searchText, selectedDiets, selectedIntolerances, sortOption, sortDirection, calorieLimit);
     };
 
     const toggleSelection = (item, list, setList) => {
@@ -36,16 +144,11 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
             ? list.filter((i) => i !== item)
             : [...list, item];
         setList(updatedList);
-
-        // Notify parent about filter changes
-        if (setList === setSelectedDiets) {
-            onFilterChange(updatedList); // Pass updated diets to parent
-        }
     };
 
-    const totalFilters = selectedDiets.length + selectedIntolerances.length;
-
-    const isLoggedIn = !!localStorage.getItem("accessToken");
+    const totalFilters = pageTitle === "Ingredients" 
+    ? selectedIntolerances.length 
+    : selectedDiets.length + selectedIntolerances.length;
 
     return (
         <>
@@ -88,18 +191,20 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
 
                             <Dropdown.Menu className="p-3" style={{ minWidth: "300px" }}>
                                 <Row>
-                                    <Col>
-                                        <h6>Diets</h6>
-                                        {DIET_CHOICES.map((diet) => (
-                                            <Form.Check
-                                                key={diet}
-                                                type="checkbox"
-                                                label={diet}
-                                                checked={selectedDiets.includes(diet)}
-                                                onChange={() => toggleSelection(diet, selectedDiets, setSelectedDiets)}
-                                            />
-                                        ))}
-                                    </Col>
+                                    {pageTitle !== "Ingredients" && (
+                                        <Col>
+                                            <h6>Diets</h6>
+                                            {DIET_CHOICES.map((diet) => (
+                                                <Form.Check
+                                                    key={diet}
+                                                    type="checkbox"
+                                                    label={diet}
+                                                    checked={selectedDiets.includes(diet)}
+                                                    onChange={() => toggleSelection(diet, selectedDiets, setSelectedDiets)}
+                                                />
+                                            ))}
+                                        </Col>
+                                    )}
                                     <Col>
                                         <h6>Intolerances</h6>
                                         {INTOLERANCE_CHOICES.map((intolerance) => (
@@ -151,7 +256,11 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
                                     Clear
                                 </Button>
                                 <hr />
-                                {SORT_OPTIONS.map((option) => (
+                                {SORT_OPTIONS.filter((option) =>
+                                    pageTitle === "Ingredients"
+                                        ? ["calories", "carbohydrates", "total-fat", "protein", "energy"].includes(option)
+                                        : true
+                                ).map((option) => (
                                     <Form.Check
                                         key={option}
                                         type="radio"
