@@ -151,7 +151,7 @@ const IngredientPopup = ({ ingredient, onClose, setIngredients }) => {
       <Card className="popup-card d-flex flex-row">
         {/* Left: Image + Info */}
         <div className="popup-left">
-          <img src={imageUrl} alt={ingredient.name} onError={handleImageError}/>
+          <img src={imageUrl} alt={ingredient.name} onError={handleImageError} />
         </div>
 
         {/* Right: Details */}
@@ -183,8 +183,11 @@ const IngredientPopup = ({ ingredient, onClose, setIngredients }) => {
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
             >
-              {ingredient.possibleUnits.map((u, idx) => (
-                <option key={idx} value={u}>{u}</option>
+              {/* Ensure the passed unit is included in the dropdown */}
+              {[unit, ...ingredient.possibleUnits.filter((u) => u !== unit)].map((u, idx) => (
+                <option key={idx} value={u}>
+                  {u}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
