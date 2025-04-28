@@ -9,7 +9,6 @@ const capitalizeFirstLetter = (string) => {
 };
 
 const IngredientCard = ({ image, name, nutrition = { nutrients: [] }, onClick }) => {
-  console.log("IngredientCard :", { name, image });
   const imageUrl = image
     ? `https://img.spoonacular.com/ingredients_100x100/${image}`
     : baseImage;

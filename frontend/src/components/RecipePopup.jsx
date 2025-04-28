@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form, ListGroup } from "react-bootstrap";
 import IngredientPopup from "../components/IngredientPopup";
+import StepsPopup from "./StepsPopup";
 import axios_api from "../utils/axiosInstance";
 import baseImage from "../assets/mealforge-recipes-image.png";
 
@@ -49,6 +50,7 @@ const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngr
 
   const [isSaved, setIsSaved] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [selectedStep, setSelectedStep] = useState(null);
   const [ingredientDetails, setIngredientDetails] = useState(null);
 
   const isLoggedIn = !!localStorage.getItem("accessToken");
@@ -199,7 +201,7 @@ const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngr
         {/* Left Column: Image + Info */}
         <div className="popup-left p-3" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           {/* Image */}
-          <img src={imageUrl} alt={title} className="img-fluid rounded mb-3" style={{ maxWidth: "100%", height: "auto" }} onError={handleImageError}/>
+          <img src={imageUrl} alt={title} className="img-fluid rounded mb-3" style={{ maxWidth: "100%", height: "auto" }} onError={handleImageError} />
 
           {/* Source Link */}
           <div className="mb-2" style={{ width: "100%", textAlign: "center" }}>
@@ -311,7 +313,13 @@ const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngr
               <strong>Steps:</strong>
               <ListGroup as="ol" numbered>
                 {analyzedInstructions[0]?.steps.map((step, idx) => (
-                  <ListGroup.Item key={idx}>{step.step}</ListGroup.Item>
+                  <ListGroup.Item
+                    key={idx}
+                    onClick={() => setSelectedStep(step)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {step.step}
+                  </ListGroup.Item>
                 ))}
               </ListGroup>
             </div>
@@ -327,6 +335,14 @@ const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngr
             setSelectedIngredient(null); // Reset selectedIngredient
             setIngredientDetails(null); // Reset ingredientDetails
           }}
+        />
+      )}
+      {/* Render StepsPopup if a step is selected */}
+      {selectedStep && (
+        <StepsPopup
+          step={selectedStep}
+          recipeIngredients={nutrition.ingredients} // Pass recipe ingredients
+          onClose={() => setSelectedStep(null)} // Close StepsPopup
         />
       )}
     </div>

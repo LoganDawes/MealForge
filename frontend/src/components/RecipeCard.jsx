@@ -33,7 +33,6 @@ const RecipeCard = ({
   usedIngredients = [],
   onClick
 }) => {
-  console.log("RecipeCard :", { title, image });
   const imageUrl = image
     ? image
     : baseImage;
