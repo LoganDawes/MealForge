@@ -144,7 +144,7 @@ const SubNavbar = ({ pageTitle, onSearch, activeTab, onTabChange, onFilterChange
                 query: searchText,
                 diets: selectedDiets,
                 intolerances: selectedIntolerances,
-                sort: sortOption,
+                sortOption: sortOption,
                 sortDirection: sortDirection,
                 calorie_limit: calorieLimit,
             });
