@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form } from "react-bootstrap";
 import "./IngredientPopup.css";
 import axios_api from "../utils/axiosInstance";
+import baseImage from "../assets/mealforge-ingredients-image.png";
 
 const nutrientList = [
   "Calories", "Fat", "Saturated Fat", "Trans Fat", "Carbohydrates", "Protein", "Cholesterol",
@@ -24,7 +25,14 @@ const IngredientPopup = ({ ingredient, onClose, setIngredients }) => {
   const [nutrition, setNutrition] = useState(ingredient.nutrition || { nutrients: [] });
   const [isSaved, setIsSaved] = useState(false); // State to track if the ingredient is saved
 
-  const imageUrl = ingredient.image ? `https://img.spoonacular.com/ingredients_100x100/${ingredient.image}` : '';
+  const imageUrl = ingredient.image
+    ? `https://img.spoonacular.com/ingredients_100x100/${ingredient.image}`
+    : baseImage;
+
+  const handleImageError = (event) => {
+    event.target.src = baseImage;
+    event.target.style.filter = "blur(1px)";
+  };
 
   const isLoggedIn = !!localStorage.getItem("accessToken");
 
@@ -143,7 +151,7 @@ const IngredientPopup = ({ ingredient, onClose, setIngredients }) => {
       <Card className="popup-card d-flex flex-row">
         {/* Left: Image + Info */}
         <div className="popup-left">
-          <img src={imageUrl} alt={ingredient.name} />
+          <img src={imageUrl} alt={ingredient.name} onError={handleImageError}/>
         </div>
 
         {/* Right: Details */}

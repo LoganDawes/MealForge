@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Table } from "react-bootstrap";
 import "./RecipeCard.css";
+import baseImage from "../assets/mealforge-recipes-image.png";
 
 const capitalizeFirstLetter = (string) => {
   if (!string) return "";
@@ -32,6 +33,17 @@ const RecipeCard = ({
   usedIngredients = [],
   onClick
 }) => {
+  console.log("RecipeCard :", { title, image });
+  const imageUrl = image
+    ? image
+    : baseImage;
+
+  const handleImageError = (event) => {
+    event.target.src = baseImage;
+    event.target.style.filter = "blur(1px)";
+    event.target.style.objectFit = "contain";
+  };
+
   const nutritionValues = {
     calories: nutrition.nutrients.find(nutrient => nutrient.name === "Calories"),
     fat: nutrition.nutrients.find(nutrient => nutrient.name === "Fat"),
@@ -63,7 +75,17 @@ const RecipeCard = ({
     <Card className="mb-3 d-flex flex-row" style={{ height: "350px" }} onClick={onClick}>
       {/* Left side: Image, Link, Diets */}
       <div style={{ width: "30%", minWidth: "200px" }} className="p-2 d-flex flex-column">
-        <img src={image} alt={title} className="img-fluid rounded" style={{ objectFit: "cover", height: "150px" }} />
+      <img
+          src={imageUrl}
+          alt={title}
+          className="img-fluid rounded"
+          style={{
+            objectFit: image ? "cover" : "contain",
+            height: "150px",
+            filter: image ? "none" : "blur(1px)",
+          }}
+          onError={handleImageError}
+        />
 
         {/* Recipe Link */}
         <a href={sourceUrl} className="text-truncate d-block mt-2" title={sourceUrl} target="_blank" rel="noopener noreferrer">

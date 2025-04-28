@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Table } from "react-bootstrap";
 import "./IngredientCard.css";
+import baseImage from "../assets/mealforge-ingredients-image.png";
 
 const capitalizeFirstLetter = (string) => {
   if (!string) return "";
@@ -8,7 +9,15 @@ const capitalizeFirstLetter = (string) => {
 };
 
 const IngredientCard = ({ image, name, nutrition = { nutrients: [] }, onClick }) => {
-  const imageUrl = image ? `https://img.spoonacular.com/ingredients_100x100/${image}` : '';
+  console.log("IngredientCard :", { name, image });
+  const imageUrl = image
+    ? `https://img.spoonacular.com/ingredients_100x100/${image}`
+    : baseImage;
+
+  const handleImageError = (event) => {
+    event.target.src = baseImage;
+    event.target.style.filter = "blur(1px)";
+  };
 
   const nutritionValues = {
     calories: nutrition.nutrients.find(nutrient => nutrient.name === "Calories"),
@@ -25,7 +34,13 @@ const IngredientCard = ({ image, name, nutrition = { nutrients: [] }, onClick })
         src={imageUrl}
         alt={name}
         className="img-fluid rounded"
-        style={{ objectFit: "contain", height: "150px", width: "100%" }}
+        style={{
+          objectFit: "contain",
+          height: "150px",
+          width: "100%",
+          filter: image ? "none" : "blur(1px)",
+        }}
+        onError={handleImageError}
       />
 
       <Card.Body>

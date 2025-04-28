@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Table, Button, Form, ListGroup } from "react-bootstrap";
 import IngredientPopup from "../components/IngredientPopup";
 import axios_api from "../utils/axiosInstance";
+import baseImage from "../assets/mealforge-recipes-image.png";
 
 const nutrientList = [
   "Calories", "Fat", "Saturated Fat", "Trans Fat", "Carbohydrates", "Protein", "Cholesterol",
@@ -51,6 +52,15 @@ const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngr
   const [ingredientDetails, setIngredientDetails] = useState(null);
 
   const isLoggedIn = !!localStorage.getItem("accessToken");
+
+  const imageUrl = image
+    ? image
+    : baseImage;
+
+  const handleImageError = (event) => {
+    event.target.src = baseImage;
+    event.target.style.filter = "blur(1px)";
+  };
 
   // Fetch ingredient details when an ingredient is selected
   useEffect(() => {
@@ -189,7 +199,7 @@ const RecipePopup = ({ recipe, onClose, setRecipes, selectedDiets = [], usedIngr
         {/* Left Column: Image + Info */}
         <div className="popup-left p-3" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           {/* Image */}
-          <img src={image} alt={title} className="img-fluid rounded mb-3" style={{ maxWidth: "100%", height: "auto" }} />
+          <img src={imageUrl} alt={title} className="img-fluid rounded mb-3" style={{ maxWidth: "100%", height: "auto" }} onError={handleImageError}/>
 
           {/* Source Link */}
           <div className="mb-2" style={{ width: "100%", textAlign: "center" }}>
